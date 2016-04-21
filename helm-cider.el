@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
-;; Package-Requires: ((cider "0.12") (cl-lib "0.5") (helm "1.9") (seq "1.0"))
+;; Package-Requires: ((cider "0.12") (cl-lib "0.5") (helm-core "1.9") (seq "1.0"))
 ;; Keywords: tools, convenience
 ;; URL:
 
@@ -31,7 +31,9 @@
 
 (require 'cider)
 (require 'cl-lib)
-(require 'helm)
+(require 'helm-lib)
+(require 'helm-multi-match)
+(require 'helm-source)
 (require 'seq)
 
 
