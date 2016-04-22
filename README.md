@@ -6,7 +6,11 @@ Not yet released as a package.
 
 ## Setup
 
-Load the file, then see that `cider-apropos` and `cider-apropos-select` are have been remapped to `helm-cider-apropos`.
+Load the file.
+
+- `cider-apropos` and `cider-apropos-select` are remapped to `helm-cider-apropos`.
+- `cider-apropos-documentation` and `cider-apropos-documentation-select` are remapped to `helm-cider-apropos-doc`.
+- `cider-browse-ns` and `cider-browse-ns-all` are remapped to `helm-cider-apropos-ns`.
 
 ## Features
 
