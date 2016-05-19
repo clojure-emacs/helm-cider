@@ -107,6 +107,10 @@ This is intended to be added to the keymap for
 
 ;;;; Utilities
 
+(defun helm-cider--regexp-symbol (string)
+  "Create a regexp that matches STRING as a symbol."
+  (concat "\\_<" (regexp-quote (or string "")) "\\_>"))
+
 (defun helm-cider--symbol-name (qualified-name)
   "Get the name porition of the fully qualified symbol name
 QUALIFIED-NAME (e.g. \"reduce\" for \"clojure.core/reduce\")."
@@ -348,7 +352,7 @@ browsing documentation."
   (helm :buffer "*Helm Clojure Symbols*"
         :candidate-number-limit 9999
         :keymap (helm-cider--apropos-map)
-        :preselect (concat "\\_<" (regexp-quote (cider-symbol-at-point t)) "\\_>")
+        :preselect (helm-cider--regexp-symbol (cider-symbol-at-point t))
         :sources (helm-cider--apropos-sources nil doc)))
 
 ;;;###autoload
@@ -374,7 +378,7 @@ the default selection."
   (cider-ensure-connected)
   (helm :buffer "*Helm Clojure Namespaces*"
         :keymap (helm-cider--apropos-ns-map)
-        :preselect (concat "\\_<" (regexp-quote (helm-cider--symbol-ns (or ns-or-qualified-name ""))) "\\_>")
+        :preselect (helm-cider--regexp-symbol (helm-cider--symbol-ns (or ns-or-qualified-name "")))
         :sources (helm-cider--apropos-ns-source)))
 
 ;;;###autoload
