@@ -348,7 +348,7 @@ browsing documentation."
   (helm :buffer "*Helm Clojure Symbols*"
         :candidate-number-limit 9999
         :keymap (helm-cider--apropos-map)
-        :preselect (concat "\\_<" (cider-symbol-at-point t) "\\_>")
+        :preselect (concat "\\_<" (regexp-quote (cider-symbol-at-point t)) "\\_>")
         :sources (helm-cider--apropos-sources nil doc)))
 
 ;;;###autoload
@@ -374,7 +374,7 @@ the default selection."
   (cider-ensure-connected)
   (helm :buffer "*Helm Clojure Namespaces*"
         :keymap (helm-cider--apropos-ns-map)
-        :preselect (concat "\\_<" (helm-cider--symbol-ns (or ns-or-qualified-name "")) "\\_>")
+        :preselect (concat "\\_<" (regexp-quote (helm-cider--symbol-ns (or ns-or-qualified-name ""))) "\\_>")
         :sources (helm-cider--apropos-ns-source)))
 
 ;;;###autoload
