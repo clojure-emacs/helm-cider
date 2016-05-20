@@ -69,9 +69,10 @@ sources."
 
 (defcustom helm-cider-apropos-ns-actions
   '(("Search in namespace" . helm-cider-apropos-symbol)
-    ("Search in namespace with docs" . helm-cider-apropos-symbol-doc)
     ("Find definition" . (lambda (ns)
                            (cider-find-ns nil ns)))
+    ("CiderDoc" . cider-doc-lookup)
+    ("Search in namespace with docs" . helm-cider-apropos-symbol-doc)
     ("Set REPL namespace" . cider-repl-set-ns))
   "Actions for Helm CIDER apropos namespaces."
   :group 'helm-cider-apropos
@@ -248,18 +249,22 @@ If DOC is true, include symbol documentation in candidates."
            into sources
            finally (return (sort sources (helm-cider--make-sort-sources-fn)))))
 
-(defun helm-cider--apropos-ns-source (&optional excluded-ns)
+(defun helm-cider--apropos-ns-source (&optional excluded-ns follow)
   "Helm source of namespaces.
 
 Namespaces in EXCLUDED-NS are excluded.  If not supplied,
-`helm-cider-apropos-excluded-ns' is used."
+`helm-cider-apropos-excluded-ns' is used.
+
+If FOLLOW is true, use `helm-follow-mode' for source."
   (helm-build-sync-source "Clojure Namespaces"
     :action helm-cider-apropos-ns-actions
     :candidates (cl-loop for ns in (cider-sync-request:ns-list)
                          unless (helm-cider--excluded-ns-p ns excluded-ns)
                          collect (cider-propertize ns 'ns) into all
                          finally (return (sort all #'string<)))
+    :follow (when follow 1)
     :nomark t
+    :persistent-action #'cider-doc-lookup
     :volatile t))
 
 (defun helm-cider--apropos-map (&optional keymap)
