@@ -285,7 +285,7 @@ copy of `helm-map'."
           (helm-exit-and-execute-action
            (lambda (candidate)
              (helm-cider-apropos-symbol-doc (helm-cider--symbol-ns candidate)
-                                            candidate))))))
+                                            (helm-cider--symbol-name candidate)))))))
     ;; Apropos
     (dolist (key (cl-mapcan (lambda (command)
                               (where-is-internal command cider-mode-map))
@@ -299,7 +299,6 @@ copy of `helm-map'."
              (helm-cider-apropos-symbol (helm-cider--symbol-ns candidate)
                                         (helm-cider--symbol-name candidate)))))))
     keymap))
-
 
 (defun helm-cider--apropos-ns-map (&optional keymap)
   "Return a keymap for use with Helm CIDER apropos namespaces.
@@ -363,9 +362,9 @@ browsing documentation."
 (defun helm-cider-apropos-symbol-doc (&optional ns symbol)
   "Choose Clojure symbols, with docs, across namespaces.
 
-Equivalent to `(helm-cider-apropos-symbol NS SYMBOL t)'."
+See `helm-cider-apropos-symbol' for more."
   (interactive)
-  (helm-cider-apropos-symbol ns symbol t))
+  (helm-cider-apropos-symbol ns (concat ns "/" symbol) t))
 
 ;;;###autoload
 (defun helm-cider-apropos-ns (&optional ns-or-qualified-name)
