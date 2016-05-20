@@ -146,7 +146,7 @@ If DESCENDING is true, sort in descending order."
   "Return true when namespace NS matches one of EXCLUDED-NS.
 
 EXCLUDED-NS is a list of namespaces (e.g. \"clojure.core\")
-and/or namespace globs (e.g. \"cider.*\"). If not provided,
+and/or namespace globs (e.g. \"cider.*\"). If not supplied,
 `helm-cider-apropos-excluded-ns' is used.
 
 NS matches a string equal to itself, or a string ending in \"*\"
@@ -163,7 +163,7 @@ that is a prefix of NS, excluding the \"*\"."
   "List of CIDER apropos results (nREPL dicts).
 
 Symbols in namespaces in EXCLUDED-NS are excluded.  If not
-provided, `helm-cider-apropos-excluded-ns' is used."
+supplied, `helm-cider-apropos-excluded-ns' is used."
   (cl-loop with excluded-ns = (or excluded-ns helm-cider-apropos-excluded-ns)
            for dict in (cider-sync-request:apropos "")
            unless (helm-cider--excluded-ns-p (helm-cider--symbol-ns (nrepl-dict-get dict "name"))
@@ -210,7 +210,7 @@ DICT is an nREPL dict."
   "Helm source for namespace NS (e.g. \"clojure.core\").
 
 DICTS is a list of CIDER apropos results (nREPL dicts) for
-NS. If not provided, it is obtained with
+NS. If not supplied, it is obtained with
 `cider-sync-request:apropos'.
 
 If DOC is true, include symbol documentation in candidates.
@@ -237,7 +237,7 @@ If FOLLOW is true, use `helm-follow-mode' for source."
   "A list of Helm sources for CIDER apropos.
 
 Each source is the set of symbols in a namespace.  Namespaces in
-EXCLUDED-NS are excluded.  If not provided,
+EXCLUDED-NS are excluded.  If not supplied,
 `helm-cider-apropos-excluded-ns' is used.
 
 If DOC is true, include symbol documentation in candidates."
@@ -251,7 +251,7 @@ If DOC is true, include symbol documentation in candidates."
 (defun helm-cider--apropos-ns-source (&optional excluded-ns)
   "Helm source of namespaces.
 
-Namespaces in EXCLUDED-NS are excluded.  If not provided,
+Namespaces in EXCLUDED-NS are excluded.  If not supplied,
 `helm-cider-apropos-excluded-ns' is used."
   (helm-build-sync-source "Clojure Namespaces"
     :action helm-cider-apropos-ns-actions
@@ -265,7 +265,7 @@ Namespaces in EXCLUDED-NS are excluded.  If not provided,
 (defun helm-cider--apropos-map (&optional keymap)
   "Return a keymap for use with Helm CIDER apropos.
 
-If KEYMAP is provided, make a copy of it to modify. Else, make a
+If KEYMAP is supplied, make a copy of it to modify. Else, make a
 copy of `helm-map'."
   (let ((keymap (copy-keymap (or keymap helm-map))))
     ;; Select namespace
@@ -284,12 +284,8 @@ copy of `helm-map'."
           (interactive)
           (helm-exit-and-execute-action
            (lambda (candidate)
-             (with-helm-after-update-hook
-               (with-helm-buffer
-                 (helm-preselect (helm-cider--symbol-name candidate)
-                                 (helm-cider--symbol-ns candidate)))
-               (recenter 1))
-             (helm-cider-apropos-symbol-doc))))))
+             (helm-cider-apropos-symbol-doc (helm-cider--symbol-ns candidate)
+                                            candidate))))))
     ;; Apropos
     (dolist (key (cl-mapcan (lambda (command)
                               (where-is-internal command cider-mode-map))
@@ -300,19 +296,15 @@ copy of `helm-map'."
           (interactive)
           (helm-exit-and-execute-action
            (lambda (candidate)
-             (with-helm-after-update-hook
-               (with-helm-buffer
-                 (helm-preselect (helm-cider--symbol-name candidate)
-                                 (helm-cider--symbol-ns candidate))
-                 (recenter 1)))
-             (helm-cider-apropos-symbol))))))
+             (helm-cider-apropos-symbol (helm-cider--symbol-ns candidate)
+                                        (helm-cider--symbol-name candidate)))))))
     keymap))
 
 
 (defun helm-cider--apropos-ns-map (&optional keymap)
   "Return a keymap for use with Helm CIDER apropos namespaces.
 
-If KEYMAP is provided, make a copy of it to modify. Else, make a
+If KEYMAP is supplied, make a copy of it to modify. Else, make a
 copy of `helm-map'."
   (let ((keymap (copy-keymap (or keymap helm-map))))
     (define-key keymap (kbd helm-cider-apropos-symbol-doc-key)
@@ -328,14 +320,23 @@ copy of `helm-map'."
 ;;;;; Apropos
 
 ;;;###autoload
-(defun helm-cider-apropos-symbol (&optional source doc)
+(defun helm-cider-apropos-symbol (&optional ns symbol doc)
   "Choose Clojure symbols across namespaces.
 
-Each Helm source is a Clojure namespace, and candidates are
+Each Helm source is a Clojure namespace (ns), and candidates are
 symbols in the namespace.
 
-If SOURCE is provided, puts the selection line on the first
-candidate of SOURCE.
+If NS is supplied, puts the selection line on the first
+candidate of source with name NS.
+
+If SYMBOL is supplied, puts the selection line on the
+first candidate matching SYMBOL.
+
+If both NS and SYMBOL are supplied, puts selection line on
+first SYMBOL of NS.
+
+If neither NS nor SYMBOL is supplied, tries to put the
+selection line on candidate matching symbol at point.
 
 If DOC is true, include symbol documentation in candidate.
 
@@ -344,27 +345,27 @@ Set `helm-cider-apropos-follow' to true to turn on
 browsing documentation."
   (interactive)
   (cider-ensure-connected)
-  (when source
+  (when ns
     (with-helm-after-update-hook
       (with-helm-buffer
-        (helm-goto-source source)
-        (helm-next-line))))
+        (let ((helm-force-updating-p t))
+          (helm-preselect (helm-cider--regexp-symbol symbol) ns)
+          (recenter 1)))))
   (helm :buffer "*Helm Clojure Symbols*"
         :candidate-number-limit 9999
         :keymap (helm-cider--apropos-map)
-        :preselect (helm-cider--regexp-symbol (cider-symbol-at-point t))
+        :preselect (unless ns
+                     (helm-cider--regexp-symbol (or symbol
+                                                    (cider-symbol-at-point t))))
         :sources (helm-cider--apropos-sources nil doc)))
 
 ;;;###autoload
-(defun helm-cider-apropos-symbol-doc (&optional source)
+(defun helm-cider-apropos-symbol-doc (&optional ns symbol)
   "Choose Clojure symbols, with docs, across namespaces.
 
-If SOURCE is provided, puts the selection line on the first
-candidate of SOURCE.
-
-Equivalent to `(helm-cider-apropos-symbol SOURCE t)'."
+Equivalent to `(helm-cider-apropos-symbol NS SYMBOL t)'."
   (interactive)
-  (helm-cider-apropos-symbol source t))
+  (helm-cider-apropos-symbol ns symbol t))
 
 ;;;###autoload
 (defun helm-cider-apropos-ns (&optional ns-or-qualified-name)
@@ -372,7 +373,7 @@ Equivalent to `(helm-cider-apropos-symbol SOURCE t)'."
 
 NS-OR-QUALIFIED-NAME is a Clojure
 namespace (e.g. \"clojure.core\") or a qualified symbol
-name (e.g. \"clojure.core/reduce\").  If provided, it is used as
+name (e.g. \"clojure.core/reduce\").  If supplied, it is used as
 the default selection."
   (interactive)
   (cider-ensure-connected)
