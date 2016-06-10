@@ -52,7 +52,7 @@
   :group 'helm-cider)
 
 (defcustom helm-cider-apropos-excluded-ns '("cider.*")
-  "List of namespaces to exclude from CIDER apropos.
+  "List of namespaces to exclude from apropos.
 
 Namespace globs (e.g. \"cider.*\" for all CIDER-specific
 namespaces) are accepted.
@@ -63,8 +63,7 @@ itself, e.g. \"cider.nrepl.middleware.apropos\") are excluded."
   :type '(repeat string))
 
 (defcustom helm-cider-apropos-follow nil
-  "If true, enable `helm-follow-mode' for CIDER apropos
-sources."
+  "If true, enable function `helm-follow-mode' for apropos sources."
   :group 'helm-cider-apropos
   :type 'boolean)
 
@@ -75,7 +74,7 @@ sources."
     ("CiderDoc" . cider-doc-lookup)
     ("Search in namespace with docs" . helm-cider-apropos-symbol-doc)
     ("Set REPL namespace" . cider-repl-set-ns))
-  "Actions for Helm CIDER apropos namespaces."
+  "Actions for Helm apropos namespaces."
   :group 'helm-cider-apropos
   :type '(alist :key-type string :value-type function))
 
@@ -84,7 +83,7 @@ sources."
     ("Find definition" . (lambda (candidate)
                            (cider-find-var nil candidate)))
     ("Find on Grimoire" . cider-grimoire-lookup))
-  "Actions for Helm CIDER apropos symbols."
+  "Actions for Helm apropos symbols."
   :group 'helm-cider-apropos
   :type '(alist :key-type string :value-type function))
 
@@ -162,7 +161,7 @@ that is a prefix of NS, excluding the \"*\"."
         (throw 'excluded t)))))
 
 (defun helm-cider--apropos-dicts (&optional excluded-ns)
-  "List of CIDER apropos results (nREPL dicts).
+  "List of apropos results (nREPL dicts).
 
 Symbols in namespaces in EXCLUDED-NS are excluded.  If not
 supplied, `helm-cider-apropos-excluded-ns' is used."
@@ -173,7 +172,7 @@ supplied, `helm-cider-apropos-excluded-ns' is used."
            collect dict))
 
 (defun helm-cider--apropos-hashtable (dicts)
-  "Build a hash table from CIDER apropos results (DICTS).
+  "Build a hash table from apropos results (DICTS).
 
 Keys are namespaces and values are lists of results (nREPL
 dict objects)."
@@ -184,7 +183,7 @@ dict objects)."
     ht))
 
 (defun helm-cider--apropos-candidate (dict)
-  "Create a Helm CIDER apropos candidate.
+  "Create a Helm apropos candidate.
 
 DICT is an nREPL dict."
   (nrepl-dbind-response dict (name type)
@@ -193,7 +192,7 @@ DICT is an nREPL dict."
           name)))
 
 (defun helm-cider--apropos-doc-candidate (dict)
-  "Create a Helm CIDER apropos doc candidate.
+  "Create a Helm apropos doc candidate.
 
 DICT is an nREPL dict."
   (nrepl-dbind-response dict (name type doc)
@@ -211,13 +210,13 @@ DICT is an nREPL dict."
 (defun helm-cider--apropos-source (ns &optional dicts doc follow)
   "Helm source for namespace NS (e.g. \"clojure.core\").
 
-DICTS is a list of CIDER apropos results (nREPL dicts) for
+DICTS is a list of apropos results (nREPL dicts) for
 NS. If not supplied, it is obtained with
 `cider-sync-request:apropos'.
 
 If DOC is true, include symbol documentation in candidates.
 
-If FOLLOW is true, use `helm-follow-mode' for source."
+If FOLLOW is true, use function `helm-follow-mode' for source."
   (helm-build-sync-source ns
     :action helm-cider-apropos-actions
     :candidate-transformer (lambda (candidates)
@@ -236,7 +235,7 @@ If FOLLOW is true, use `helm-follow-mode' for source."
     :volatile t))
 
 (defun helm-cider--apropos-sources (&optional excluded-ns doc)
-  "A list of Helm sources for CIDER apropos.
+  "A list of Helm sources for apropos.
 
 Each source is the set of symbols in a namespace.  Namespaces in
 EXCLUDED-NS are excluded.  If not supplied,
@@ -256,7 +255,7 @@ If DOC is true, include symbol documentation in candidates."
 Namespaces in EXCLUDED-NS are excluded.  If not supplied,
 `helm-cider-apropos-excluded-ns' is used.
 
-If FOLLOW is true, use `helm-follow-mode' for source."
+If FOLLOW is true, use function `helm-follow-mode' for source."
   (helm-build-sync-source "Clojure Namespaces"
     :action helm-cider-apropos-ns-actions
     :candidates (cl-loop for ns in (cider-sync-request:ns-list)
@@ -269,9 +268,9 @@ If FOLLOW is true, use `helm-follow-mode' for source."
     :volatile t))
 
 (defun helm-cider--apropos-map (&optional keymap)
-  "Return a keymap for use with Helm CIDER apropos.
+  "Return a keymap for use with Helm apropos.
 
-If KEYMAP is supplied, make a copy of it to modify. Else, make a
+If KEYMAP is supplied, make a copy of it to modify.  Else, make a
 copy of `helm-map'."
   (let ((keymap (copy-keymap (or keymap helm-map))))
     ;; Select namespace
@@ -307,9 +306,9 @@ copy of `helm-map'."
     keymap))
 
 (defun helm-cider--apropos-ns-map (&optional keymap)
-  "Return a keymap for use with Helm CIDER apropos namespaces.
+  "Return a keymap for use with Helm apropos namespaces.
 
-If KEYMAP is supplied, make a copy of it to modify. Else, make a
+If KEYMAP is supplied, make a copy of it to modify.  Else, make a
 copy of `helm-map'."
   (let ((keymap (copy-keymap (or keymap helm-map))))
     (define-key keymap (kbd helm-cider-apropos-symbol-doc-key)
@@ -346,7 +345,7 @@ selection line on candidate matching symbol at point.
 If DOC is true, include symbol documentation in candidate.
 
 Set `helm-cider-apropos-follow' to true to turn on
-`helm-follow-mode' for all sources. This is useful for quickly
+function `helm-follow-mode' for all sources.  This is useful for quickly
 browsing documentation."
   (interactive)
   (cider-ensure-connected)
@@ -366,9 +365,10 @@ browsing documentation."
 
 ;;;###autoload
 (defun helm-cider-apropos-symbol-doc (&optional ns symbol)
-  "Choose Clojure symbols, with docs, across namespaces.
+  "Choose Clojure SYMBOLs, with docs, across namespaces.
 
-See `helm-cider-apropos-symbol' for more."
+Optional arguments NS and SYMBOL are as in
+`helm-cider-apropos-symbol'."
   (interactive)
   (helm-cider-apropos-symbol ns (concat ns "/" symbol) t))
 
