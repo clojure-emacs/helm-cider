@@ -137,7 +137,7 @@ TYPE values include \"function\", \"macro\", etc."
   "Sort Helm sources by name in ascending order.
 
 If DESCENDING is true, sort in descending order."
-  (let ((fn (if descending #'string> #'string<)))
+  (let ((fn (if descending (lambda (a b) (string< b a)) #'string<)))
     (lambda (s1 s2)
       (funcall fn (assoc-default 'name s1) (assoc-default 'name s2)))))
 
