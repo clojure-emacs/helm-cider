@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
-;; Package-Requires: ((cider "0.12") (cl-lib "0.5") (helm-core "1.9") (seq "1.0"))
+;; Package-Requires: ((emacs "24.4") (cider "0.12") (cl-lib "0.5") (helm-core "1.9") (seq "1.0"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
 
@@ -319,7 +319,7 @@ copy of `helm-map'."
     keymap))
 
 
-;;;; Autoloads
+;;;; API
 
 ;;;;; Apropos
 
@@ -401,14 +401,43 @@ If ARG is raw prefix argument \\[universal-argument]
         (t (helm-cider-apropos-symbol))))
 
 
-;;;; Key bindings
+;;;; Key bindings and minor mode
 
-(define-key cider-mode-map [remap cider-apropos] #'helm-cider-apropos)
-(define-key cider-mode-map [remap cider-apropos-select] #'helm-cider-apropos)
-(define-key cider-mode-map [remap cider-apropos-documentation] #'helm-cider-apropos-symbol-doc)
-(define-key cider-mode-map [remap cider-apropos-documentation-select] #'helm-cider-apropos-symbol-doc)
-(define-key cider-mode-map [remap cider-browse-ns] #'helm-cider-apropos-ns)
-(define-key cider-mode-map [remap cider-browse-ns-all] #'helm-cider-apropos-ns)
+(defcustom helm-cider-overrides
+  '((cider-apropos . helm-cider-apropos)
+    (cider-apropos-select . helm-cider-apropos)
+    (cider-apropos-documentation . helm-cider-apropos-symbol-doc)
+    (cider-apropos-documentation-select . helm-cider-apropos-symbol-doc)
+    (cider-browse-ns . helm-cider-apropos-ns)
+    (cider-browse-ns-all . helm-cider-apropos-ns))
+  "Alist of CIDER functions and Helm versions replacing them."
+  :group 'helm-cider
+  :type '(alist :key-type symbol :value-type symbol))
+
+(defun helm-cider--override ()
+  "Override CIDER functions with Helm versions.
+
+The old and new functions are those specified in
+`helm-cider-overrides'."
+  (require 'cider)
+  (dolist (pair helm-cider-overrides)
+    (let ((symbol (car pair))
+          (newfun (symbol-function (cdr pair))))
+      (unless (advice-member-p newfun symbol)
+        (advice-add symbol :override newfun)))))
+
+(defun helm-cider--revert ()
+  "Revert to original CIDER functions."
+  (dolist (pair helm-cider-overrides)
+    (advice-remove (car pair) (symbol-function (cdr pair)))))
+
+;;;###autoload
+(define-minor-mode helm-cider-mode
+  "Use Helm for CIDER."
+  :global t
+  (if helm-cider-mode
+      (helm-cider--override)
+    (helm-cider--revert)))
 
 
 (provide 'helm-cider)
