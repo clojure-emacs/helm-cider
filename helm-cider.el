@@ -6,7 +6,7 @@
 ;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "1.9") (seq "1.0"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
-;; Version: 0.1.0
+;; Version: 0.1.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -110,8 +110,18 @@ This is intended to be added to the keymap for
 ;;;; Utilities
 
 (defun helm-cider--regexp-symbol (string)
-  "Create a regexp that matches STRING as a symbol."
-  (concat "\\_<" (regexp-quote (or string "")) "\\_>"))
+  "Create a regexp that matches STRING as a symbol.
+
+If STRING ends in a character that `helm-major-mode' does not
+consider to be in the word or symbol syntax class, do not include
+a symbol-end \(\\_>\); otherwise, the regexp wouldn't match."
+  (let* ((lchar (aref string (1- (length string))))
+         (symbol-end (with-syntax-table helm-major-mode-syntax-table
+                       (if (or (= ?w (char-syntax lchar))
+                               (= ?_ (char-syntax lchar)))
+                           "\\_>"
+                         ""))))
+    (concat "\\_<" (regexp-quote (or string "")) symbol-end)))
 
 (defun helm-cider--symbol-name (qualified-name)
   "Get the name porition of the fully qualified symbol name
@@ -350,19 +360,23 @@ function `helm-follow-mode' for all sources.  This is useful for quickly
 browsing documentation."
   (interactive)
   (cider-ensure-connected)
-  (when ns
-    (with-helm-after-update-hook
-      (with-helm-buffer
-        (let ((helm-force-updating-p t))
-          (helm-preselect (helm-cider--regexp-symbol symbol) ns)
-          (recenter 1)))))
-  (helm :buffer "*Helm Clojure Symbols*"
-        :candidate-number-limit 9999
-        :keymap (helm-cider--apropos-map)
-        :preselect (unless ns
-                     (helm-cider--regexp-symbol (or symbol
-                                                    (cider-symbol-at-point t))))
-        :sources (helm-cider--apropos-sources nil doc)))
+  (let* ((symbol (or symbol (cider-symbol-at-point t)))
+         (symbol (cond ((and ns symbol doc) (helm-cider--regexp-symbol
+                                             (concat ns "/" symbol)))
+                       ((and symbol doc) (regexp-quote symbol))
+                       (symbol (helm-cider--regexp-symbol symbol))
+                       (t nil))))
+    (when ns
+      (with-helm-after-update-hook
+        (with-helm-buffer
+          (let ((helm-force-updating-p t))
+            (helm-preselect symbol ns)
+            (recenter 1)))))
+    (helm :buffer "*Helm Clojure Symbols*"
+          :candidate-number-limit 9999
+          :keymap (helm-cider--apropos-map)
+          :preselect (unless ns symbol)
+          :sources (helm-cider--apropos-sources nil doc))))
 
 ;;;###autoload
 (defun helm-cider-apropos-symbol-doc (&optional ns symbol)
@@ -371,7 +385,7 @@ browsing documentation."
 Optional arguments NS and SYMBOL are as in
 `helm-cider-apropos-symbol'."
   (interactive)
-  (helm-cider-apropos-symbol ns (concat ns "/" symbol) t))
+  (helm-cider-apropos-symbol ns symbol t))
 
 ;;;###autoload
 (defun helm-cider-apropos-ns (&optional ns-or-qualified-name)
@@ -385,7 +399,8 @@ the default selection."
   (cider-ensure-connected)
   (helm :buffer "*Helm Clojure Namespaces*"
         :keymap (helm-cider--apropos-ns-map)
-        :preselect (helm-cider--regexp-symbol (helm-cider--symbol-ns (or ns-or-qualified-name "")))
+        :preselect (helm-cider--regexp-symbol
+                    (helm-cider--symbol-ns (or ns-or-qualified-name "")))
         :sources (helm-cider--apropos-ns-source)))
 
 ;;;###autoload
