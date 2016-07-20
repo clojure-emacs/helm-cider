@@ -115,13 +115,15 @@ This is intended to be added to the keymap for
 If STRING ends in a character that `helm-major-mode' does not
 consider to be in the word or symbol syntax class, do not include
 a symbol-end \(\\_>\); otherwise, the regexp wouldn't match."
-  (let* ((lchar (aref string (1- (length string))))
-         (symbol-end (with-syntax-table helm-major-mode-syntax-table
-                       (if (or (= ?w (char-syntax lchar))
-                               (= ?_ (char-syntax lchar)))
-                           "\\_>"
-                         ""))))
-    (concat "\\_<" (regexp-quote (or string "")) symbol-end)))
+  (if (not (string= "" string))
+      (let* ((lchar (aref string (1- (length string))))
+             (symbol-end (with-syntax-table helm-major-mode-syntax-table
+                           (if (or (= ?w (char-syntax lchar))
+                                   (= ?_ (char-syntax lchar)))
+                               "\\_>"
+                             ""))))
+        (concat "\\_<" (regexp-quote (or string "")) symbol-end))
+    ""))
 
 (defun helm-cider--symbol-name (qualified-name)
   "Get the name porition of the fully qualified symbol name
