@@ -331,6 +331,19 @@ copy of `helm-map'."
                                         (helm-cider-apropos-symbol-doc candidate)))))
     keymap))
 
+(defun helm-cider--resolve-symbol (&optional ns symbol)
+  "Try to get correct values for NS and SYMBOL."
+  (let* ((symbol (or symbol (unless ns (cider-symbol-at-point))))
+         (qualified (when symbol (cider-namespace-qualified-p symbol)))
+         (ns (cond (qualified (nrepl-dict-get (cider-var-info symbol t) "ns"))
+                   ((and ns symbol)
+                    (nrepl-dict-get (cider-var-info (concat ns "/" symbol) t) "ns"))
+                   (symbol (nrepl-dict-get (cider-var-info symbol t) "ns"))
+                   (t ns))))
+    (list ns (if qualified
+                 (helm-cider--symbol-name symbol)
+               symbol))))
+
 
 ;;;; API
 
@@ -343,14 +356,14 @@ copy of `helm-map'."
 Each Helm source is a Clojure namespace (ns), and candidates are
 symbols in the namespace.
 
+If both NS and SYMBOL are supplied, puts selection line on
+first SYMBOL of NS.
+
 If NS is supplied, puts the selection line on the first
 candidate of source with name NS.
 
 If SYMBOL is supplied, puts the selection line on the
 first candidate matching SYMBOL.
-
-If both NS and SYMBOL are supplied, puts selection line on
-first SYMBOL of NS.
 
 If neither NS nor SYMBOL is supplied, tries to put the
 selection line on candidate matching symbol at point.
@@ -362,21 +375,18 @@ function `helm-follow-mode' for all sources.  This is useful for quickly
 browsing documentation."
   (interactive)
   (cider-ensure-connected)
-  (let* ((symbol (or symbol (cider-symbol-at-point t)))
-         (symbol (cond ((and symbol doc) (regexp-quote (concat ns "/" symbol)))
-                       (symbol (helm-cider--regexp-symbol symbol))
-                       (t nil))))
-    (when ns
+  (cl-multiple-value-bind (ns symbol) (helm-cider--resolve-symbol ns symbol)
+    (let ((symbol (cond ((and symbol doc) (regexp-quote (concat ns "/" symbol)))
+                        (symbol (helm-cider--regexp-symbol symbol)))))
       (with-helm-after-update-hook
         (with-helm-buffer
           (let ((helm-force-updating-p t))
-            (helm-preselect symbol ns)
-            (recenter 1)))))
-    (helm :buffer "*Helm Clojure Symbols*"
-          :candidate-number-limit 9999
-          :keymap (helm-cider--apropos-map)
-          :preselect (unless ns symbol)
-          :sources (helm-cider--apropos-sources nil doc))))
+            (helm-preselect (or symbol (lambda ())) ns)
+            (recenter 1))))
+      (helm :buffer "*Helm Clojure Symbols*"
+            :candidate-number-limit 9999
+            :keymap (helm-cider--apropos-map)
+            :sources (helm-cider--apropos-sources nil doc)))))
 
 ;;;###autoload
 (defun helm-cider-apropos-symbol-doc (&optional ns symbol)
