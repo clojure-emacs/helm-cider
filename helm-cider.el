@@ -446,7 +446,6 @@ If ARG is raw prefix argument \\[universal-argument]
 
 The old and new functions are those specified in
 `helm-cider-overrides'."
-  (require 'cider)
   (dolist (pair helm-cider-overrides)
     (let ((symbol (car pair))
           (newfun (symbol-function (cdr pair))))
