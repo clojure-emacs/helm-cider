@@ -3,10 +3,10 @@
 ;; Copyright (C) 2016 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
-;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "1.9") (seq "1.0"))
+;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.0") (seq "1.0"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
-;; Version: 0.1.1
+;; Version: 0.1.2
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -380,8 +380,11 @@ browsing documentation."
                         (symbol (helm-cider--regexp-symbol symbol)))))
       (with-helm-after-update-hook
         (with-helm-buffer
-          (let ((helm-force-updating-p t))
-            (helm-preselect (or symbol (lambda ())) ns)
+          (let ((helm--force-updating-p t))
+            (if symbol
+                (helm-preselect symbol ns)
+              (helm-goto-source ns)
+              (helm-next-line))
             (recenter 1))))
       (helm :buffer "*Helm Clojure Symbols*"
             :candidate-number-limit 9999
