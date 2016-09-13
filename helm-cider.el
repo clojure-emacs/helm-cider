@@ -125,6 +125,14 @@ a symbol-end \(\\_>\); otherwise, the regexp wouldn't match."
         (concat "\\_<" (regexp-quote (or string "")) symbol-end))
     ""))
 
+(defun helm-cider--source-by-name (name &optional sources)
+  "Get a Helm source in SOURCES by NAME.
+
+Default value of SOURCES is `helm-sources'."
+  (car (cl-member-if (lambda (source)
+                       (string= name (assoc-default 'name source)))
+                     (or sources helm-sources))))
+
 (defun helm-cider--symbol-name (qualified-name)
   "Get the name porition of the fully qualified symbol name
 QUALIFIED-NAME (e.g. \"reduce\" for \"clojure.core/reduce\")."
@@ -382,7 +390,7 @@ browsing documentation."
         (with-helm-buffer
           (let ((helm--force-updating-p t))
             (if symbol
-                (helm-preselect symbol ns)
+                (helm-preselect symbol (helm-cider--source-by-name ns))
               (helm-goto-source ns)
               (helm-next-line))
             (recenter 1))))
