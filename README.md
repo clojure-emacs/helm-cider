@@ -1,3 +1,5 @@
+[![MELPA](https://melpa.org/packages/helm-cider-badge.svg)](https://melpa.org/#/helm-cider)
+
 # Helm Cider
 
 [Helm](https://github.com/emacs-helm/helm) interface to [CIDER](https://github.com/clojure-emacs/cider).
