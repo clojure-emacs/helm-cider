@@ -1,4 +1,6 @@
-> [Helm](https://github.com/emacs-helm/helm) interface to [CIDER](https://github.com/clojure-emacs/cider).
+# Helm Cider
+
+[Helm](https://github.com/emacs-helm/helm) interface to [CIDER](https://github.com/clojure-emacs/cider).
 
 ## Installation
 
@@ -30,17 +32,23 @@ Calling `cider-apropos` or `cider-apropos-select` brings up a Helm buffer of all
 
 Each Helm source is a namespace. To select a namespace, use `C-c n` (the default value of `helm-cider-apropos-ns-key`) and select the desired namespace.
 
+![Apropos](./doc/apropos.png)
+
 ### Apropos documentation
 
 Calling `cider-apropos-documentation` or `cider-apropos-documentation-select` brings up a Helm buffer of all symbols across all namespaces with documentation.
 
 Select a namespace as with normal apropos.
 
+![Apropos documentation](./doc/apropos-documentation.png)
+
 ### Namespaces
 
 Calling `cider-browse-ns` or `cider-browse-ns-all` brings up a Helm buffer of namespaces.
 
 Use `RET` to select a namespace and view symbols in that namespace *without* documentation. Use `S-RET` to select a namespace and view symbols in that namespace *with* documentation.
+
+![Browse namespaces](./doc/browse-ns.png)
 
 ## See Also
 
