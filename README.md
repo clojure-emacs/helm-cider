@@ -52,6 +52,16 @@ Use `RET` to select a namespace and view symbols in that namespace *without* doc
 
 ![Browse namespaces](./doc/browse-ns.png)
 
+### REPL history
+
+Calling `helm-cider-repl-history` (bound to `C-c C-l` by default) in a CIDER REPL brings up a Helm buffer of REPL entries.
+
+Use `RET` to select an entry and insert it into the REPL.
+
+Use `f2` to delete an entry from history. Multiple entries can be marked and deleted.
+
+![REPL History](./doc/repl-history.png)
+
 ## See Also
 
 - CIDER issue [#1541](https://github.com/clojure-emacs/cider/issues/1541), regarding [Ido](https://www.gnu.org/software/emacs/manual/html_mono/ido.html)/Helm support for `apropos`.

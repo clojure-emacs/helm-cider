@@ -6,7 +6,7 @@
 ;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.0") (seq "1.0"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
-;; Version: 0.1.2
+;; Version: 0.2.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 (require 'cider)
 (require 'cl-lib)
 (require 'helm)
+(require 'helm-cider-repl)
 (require 'helm-lib)
 (require 'helm-multi-match)
 (require 'helm-source)
@@ -475,8 +476,11 @@ The old and new functions are those specified in
   "Use Helm for CIDER."
   :global t
   (if helm-cider-mode
-      (helm-cider--override)
-    (helm-cider--revert)))
+      (progn
+        (helm-cider--override)
+        (define-key cider-repl-mode-map (kbd "C-c C-l") #'helm-cider-repl-history))
+    (helm-cider--revert)
+    (define-key cider-repl-mode-map (kbd "C-c C-l") nil)))
 
 
 (provide 'helm-cider)
