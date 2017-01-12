@@ -69,21 +69,23 @@ itself, e.g. \"cider.nrepl.middleware.apropos\") are excluded."
   :type 'boolean)
 
 (defcustom helm-cider-apropos-ns-actions
-  '(("Search in namespace" . helm-cider-apropos-symbol)
-    ("Find definition" . (lambda (ns)
-                           (cider-find-ns nil ns)))
-    ("CiderDoc" . cider-doc-lookup)
-    ("Search in namespace with docs" . helm-cider-apropos-symbol-doc)
-    ("Set REPL namespace" . cider-repl-set-ns))
+  (helm-make-actions
+   "Search in namespace" 'helm-cider-apropos-symbol
+   "Find definition" (lambda (ns)
+                       (cider-find-ns nil ns))
+   "CiderDoc" 'cider-doc-lookup
+   "Search in namespace with docs" 'helm-cider-apropos-symbol-doc
+   "Set REPL namespace" 'cider-repl-set-ns)
   "Actions for Helm apropos namespaces."
   :group 'helm-cider-apropos
   :type '(alist :key-type string :value-type function))
 
 (defcustom helm-cider-apropos-actions
-  '(("CiderDoc" . cider-doc-lookup)
-    ("Find definition" . (lambda (candidate)
-                           (cider-find-var nil candidate)))
-    ("Find on Grimoire" . cider-grimoire-lookup))
+  (helm-make-actions
+   "CiderDoc" 'cider-doc-lookup
+   "Find definition" (lambda (candidate)
+                       (cider-find-var nil candidate))
+   "Find on Grimoire" 'cider-grimoire-lookup)
   "Actions for Helm apropos symbols."
   :group 'helm-cider-apropos
   :type '(alist :key-type string :value-type function))
