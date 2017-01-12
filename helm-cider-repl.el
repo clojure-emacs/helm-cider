@@ -128,6 +128,7 @@ Useful when the entry longer than `helm-cider-repl-history-max-lines' lines."
 
 ;;;; API
 
+;;;###autoload
 (defun helm-cider-repl-history-insert (candidate)
   "Insert candidate at the last CIDER REPL prompt.
 
@@ -138,6 +139,7 @@ This function is meant to be one of `helm-cider-repl-history-actions'."
   (cider-repl-kill-input)
   (insert candidate))
 
+;;;###autoload
 (defun helm-cider-repl-history-delete (_candidate)
   "Delete marked candidates from `cider-repl-input-history'.
 
@@ -146,6 +148,7 @@ This function is meant to be one of `helm-cider-repl-history-actions'."
            do (setq cider-repl-input-history
                     (delete cand cider-repl-input-history))))
 
+;;;###autoload
 (defun helm-cider-repl-history ()
   "Helm interface to CIDER REPL history."
   (interactive)
