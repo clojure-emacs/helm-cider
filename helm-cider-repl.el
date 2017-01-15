@@ -152,8 +152,10 @@ This function is meant to be one of `helm-cider-repl-history-actions'."
 (defun helm-cider-repl-history ()
   "Helm interface to CIDER REPL history."
   (interactive)
-  (helm :buffer "*Helm CIDER REPL History*"
-        :sources (helm-cider-repl--history-source)))
+  (if (null cider-repl-input-history)
+      (user-error "No CIDER REPL history")
+    (helm :buffer "*Helm CIDER REPL History*"
+          :sources (helm-cider-repl--history-source))))
 
 
 (provide 'helm-cider-repl)
