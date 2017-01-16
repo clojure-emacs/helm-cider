@@ -98,20 +98,31 @@ lines of candidate."
                                (point)))
                             "[...]"))
                          c)
-           else collect c))
+           ;; Need to collect a cons b/c persistent action is executed on
+           ;; unpropertied string otherwise
+           ;; See: https://github.com/emacs-helm/helm/blob/v2.4.0/helm.el#L4999
+           else collect (cons c c)))
 
-(defun helm-cider-repl--history-preview (entry)
-  "Preview the CIDER REPL history entry in a temp buffer.
+(defun helm-cider-repl--history-preview (candidate)
+  "Preview the CIDER REPL history candidate in a temp buffer.
 
-Useful when the entry longer than `helm-cider-repl-history-max-lines' lines."
+Useful when the candidate longer than `helm-cider-repl-history-max-lines' lines."
+
   (let ((buf (get-buffer-create "*Helm CIDER REPL History Preview*")))
-    (switch-to-buffer buf)
-    (setq buffer-read-only nil)
-    (erase-buffer)
-    (insert entry)
-    (clojure-mode)
-    (font-lock-ensure)
-    (setq buffer-read-only t)))
+    (cl-flet ((preview (candidate)
+                       (switch-to-buffer buf)
+                       (setq buffer-read-only nil)
+                       (erase-buffer)
+                       (insert candidate)
+                       (setq buffer-read-only t)))
+      (if (and (helm-attr 'previewp)
+               (string= candidate (helm-attr 'current-candidate)))
+          (progn
+            (kill-buffer buf)
+            (helm-attrset 'previewp nil))
+        (preview candidate)
+        (helm-attrset 'previewp t)))
+    (helm-attrset 'current-candidate candidate)))
 
 (defun helm-cider-repl--history-source ()
   "Source for Helm CIDER REPL history."
