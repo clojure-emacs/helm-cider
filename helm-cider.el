@@ -6,7 +6,7 @@
 ;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.0") (seq "1.0"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
-;; Version: 0.2.0
+;; Version: 0.3.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -231,72 +231,8 @@ DICT is an nREPL dict."
       ;; Candidate
       (cons (buffer-string) name))))
 
-(defun helm-cider--apropos-source (ns &optional dicts doc follow)
-  "Helm source for namespace NS (e.g. \"clojure.core\").
-
-DICTS is a list of apropos results (nREPL dicts) for
-NS. If not supplied, it is obtained with
-`cider-sync-request:apropos'.
-
-If DOC is true, include symbol documentation in candidates.
-
-If FOLLOW is true, use function `helm-follow-mode' for source."
-  (helm-build-sync-source ns
-    :action helm-cider-apropos-actions
-    :candidate-transformer (lambda (candidates)
-                             (seq-sort (lambda (a b)
-                                         (string< (cdr a) (cdr b)))
-                                       candidates))
-    :candidates (let ((fn (if doc
-                              #'helm-cider--apropos-doc-candidate
-                            #'helm-cider--apropos-candidate)))
-                  (mapcar fn (or dicts
-                                 (cider-sync-request:apropos "" ns))))
-    :follow (when follow 1)
-    :multiline doc
-    :nomark t
-    :persistent-action #'cider-doc-lookup
-    :volatile t))
-
-(defun helm-cider--apropos-sources (&optional excluded-ns doc)
-  "A list of Helm sources for apropos.
-
-Each source is the set of symbols in a namespace.  Namespaces in
-EXCLUDED-NS are excluded.  If not supplied,
-`helm-cider-apropos-excluded-ns' is used.
-
-If DOC is true, include symbol documentation in candidates."
-  (cl-loop with ht = (helm-cider--apropos-hashtable
-                      (helm-cider--apropos-dicts excluded-ns))
-           for ns being the hash-keys in ht using (hash-value dicts)
-           collect (helm-cider--apropos-source ns dicts doc helm-cider-apropos-follow)
-           into sources
-           finally (return (sort sources (helm-cider--make-sort-sources-fn)))))
-
-(defun helm-cider--apropos-ns-source (&optional excluded-ns follow)
-  "Helm source of namespaces.
-
-Namespaces in EXCLUDED-NS are excluded.  If not supplied,
-`helm-cider-apropos-excluded-ns' is used.
-
-If FOLLOW is true, use function `helm-follow-mode' for source."
-  (helm-build-sync-source "Clojure Namespaces"
-    :action helm-cider-apropos-ns-actions
-    :candidates (cl-loop for ns in (cider-sync-request:ns-list)
-                         unless (helm-cider--excluded-ns-p ns excluded-ns)
-                         collect (cider-propertize ns 'ns) into all
-                         finally (return (sort all #'string<)))
-    :follow (when follow 1)
-    :nomark t
-    :persistent-action #'cider-doc-lookup
-    :volatile t))
-
-(defun helm-cider--apropos-map (&optional keymap)
-  "Return a keymap for use with Helm apropos.
-
-If KEYMAP is supplied, make a copy of it to modify.  Else, make a
-copy of `helm-map'."
-  (let ((keymap (copy-keymap (or keymap helm-map))))
+(defvar helm-cider--apropos-map
+  (let ((keymap (copy-keymap helm-map)))
     ;; Select namespace
     (define-key keymap (kbd helm-cider-apropos-ns-key)
       (lambda ()
@@ -327,20 +263,80 @@ copy of `helm-map'."
            (lambda (candidate)
              (helm-cider-apropos-symbol (helm-cider--symbol-ns candidate)
                                         (helm-cider--symbol-name candidate)))))))
-    keymap))
+    keymap)
+  "Return a keymap for use with `helm-cider-apropos'.")
 
-(defun helm-cider--apropos-ns-map (&optional keymap)
-  "Return a keymap for use with Helm apropos namespaces.
+(defun helm-cider--apropos-source (ns &optional dicts doc follow)
+  "Helm source for namespace NS (e.g. \"clojure.core\").
 
-If KEYMAP is supplied, make a copy of it to modify.  Else, make a
-copy of `helm-map'."
-  (let ((keymap (copy-keymap (or keymap helm-map))))
+DICTS is a list of apropos results (nREPL dicts) for
+NS. If not supplied, it is obtained with
+`cider-sync-request:apropos'.
+
+If DOC is true, include symbol documentation in candidates.
+
+If FOLLOW is true, use function `helm-follow-mode' for source."
+  (helm-build-sync-source ns
+    :action helm-cider-apropos-actions
+    :candidate-transformer (lambda (candidates)
+                             (seq-sort (lambda (a b)
+                                         (string< (cdr a) (cdr b)))
+                                       candidates))
+    :candidates (let ((fn (if doc
+                              #'helm-cider--apropos-doc-candidate
+                            #'helm-cider--apropos-candidate)))
+                  (mapcar fn (or dicts
+                                 (cider-sync-request:apropos "" ns))))
+    :follow (when follow 1)
+    :keymap helm-cider--apropos-map
+    :multiline doc
+    :nomark t
+    :persistent-action #'cider-doc-lookup
+    :volatile t))
+
+(defun helm-cider--apropos-sources (&optional excluded-ns doc)
+  "A list of Helm sources for apropos.
+
+Each source is the set of symbols in a namespace.  Namespaces in
+EXCLUDED-NS are excluded.  If not supplied,
+`helm-cider-apropos-excluded-ns' is used.
+
+If DOC is true, include symbol documentation in candidates."
+  (cl-loop with ht = (helm-cider--apropos-hashtable
+                      (helm-cider--apropos-dicts excluded-ns))
+           for ns being the hash-keys in ht using (hash-value dicts)
+           collect (helm-cider--apropos-source ns dicts doc helm-cider-apropos-follow)
+           into sources
+           finally (return (sort sources (helm-cider--make-sort-sources-fn)))))
+
+(defvar helm-cider--apropos-ns-map
+  (let ((keymap (copy-keymap helm-map)))
     (define-key keymap (kbd helm-cider-apropos-symbol-doc-key)
       (lambda ()
         (interactive)
         (helm-exit-and-execute-action (lambda (candidate)
                                         (helm-cider-apropos-symbol-doc candidate)))))
-    keymap))
+    keymap)
+  "Return a keymap for use with `helm-cider-apropos-ns'.")
+
+(defun helm-cider--apropos-ns-source (&optional excluded-ns follow)
+  "Helm source of namespaces.
+
+Namespaces in EXCLUDED-NS are excluded.  If not supplied,
+`helm-cider-apropos-excluded-ns' is used.
+
+If FOLLOW is true, use function `helm-follow-mode' for source."
+  (helm-build-sync-source "Clojure Namespaces"
+    :action helm-cider-apropos-ns-actions
+    :candidates (cl-loop for ns in (cider-sync-request:ns-list)
+                         unless (helm-cider--excluded-ns-p ns excluded-ns)
+                         collect (cider-propertize ns 'ns) into all
+                         finally (return (sort all #'string<)))
+    :follow (when follow 1)
+    :keymap helm-cider--apropos-ns-map
+    :nomark t
+    :persistent-action #'cider-doc-lookup
+    :volatile t))
 
 (defun helm-cider--resolve-symbol (&optional ns symbol)
   "Try to get correct values for NS and SYMBOL."
@@ -399,7 +395,6 @@ browsing documentation."
             (recenter 1))))
       (helm :buffer "*Helm Clojure Symbols*"
             :candidate-number-limit 9999
-            :keymap (helm-cider--apropos-map)
             :sources (helm-cider--apropos-sources nil doc)))))
 
 ;;;###autoload
@@ -422,7 +417,6 @@ the default selection."
   (interactive)
   (cider-ensure-connected)
   (helm :buffer "*Helm Clojure Namespaces*"
-        :keymap (helm-cider--apropos-ns-map)
         :preselect (helm-cider--regexp-symbol
                     (helm-cider--symbol-ns (or ns-or-qualified-name "")))
         :sources (helm-cider--apropos-ns-source)))
