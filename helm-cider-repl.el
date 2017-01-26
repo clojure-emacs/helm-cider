@@ -111,10 +111,9 @@ Useful when the candidate longer than `helm-cider-repl-history-max-lines' lines.
   (let ((buf (get-buffer-create "*Helm CIDER REPL History Preview*")))
     (cl-flet ((preview (candidate)
                        (switch-to-buffer buf)
-                       (setq buffer-read-only nil)
-                       (erase-buffer)
-                       (insert candidate)
-                       (setq buffer-read-only t)))
+                       (let ((inhibit-read-only t))
+                         (erase-buffer)
+                         (insert candidate))))
       (if (and (helm-attr 'previewp)
                (string= candidate (helm-attr 'current-candidate)))
           (progn
