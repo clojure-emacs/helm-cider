@@ -442,7 +442,9 @@ browsing documentation."
           (let ((helm--force-updating-p t))
             (if symbol
                 (helm-preselect symbol (helm-cider--source-by-name ns))
-              (helm-goto-source (or ns "")))
+              (helm-goto-source (or ns ""))
+              (when ns
+                (helm-next-line)))
             (recenter 1))))
       (helm :buffer "*Helm Clojure Symbols*"
             :candidate-number-limit 9999
