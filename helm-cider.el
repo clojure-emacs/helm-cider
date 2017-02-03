@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
-;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.0") (seq "1.0"))
+;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.4") (seq "1.0"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
 ;; Version: 0.3.0
@@ -442,8 +442,7 @@ browsing documentation."
           (let ((helm--force-updating-p t))
             (if symbol
                 (helm-preselect symbol (helm-cider--source-by-name ns))
-              (helm-goto-source ns)
-              (helm-next-line))
+              (helm-goto-source (or ns "")))
             (recenter 1))))
       (helm :buffer "*Helm Clojure Symbols*"
             :candidate-number-limit 9999
