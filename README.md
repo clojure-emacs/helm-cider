@@ -1,4 +1,5 @@
 [![MELPA](https://melpa.org/packages/helm-cider-badge.svg)](https://melpa.org/#/helm-cider)
+[![License GPL 3][badge-license]](http://www.gnu.org/licenses/gpl-3.0.txt)
 
 # Helm Cider
 
@@ -67,3 +68,5 @@ Use `f2` to delete an entry from history. Multiple entries can be marked and del
 - CIDER issue [#1541](https://github.com/clojure-emacs/cider/issues/1541), regarding [Ido](https://www.gnu.org/software/emacs/manual/html_mono/ido.html)/Helm support for `apropos`.
 - CIDER issue [#1059](https://github.com/clojure-emacs/cider/issues/1059), regarding seeing more completion candidates and grouping them by namespace.
 - [helm-clojure](https://github.com/prepor/helm-clojure), an earlier project with similar ideas.
+
+[badge-license]: https://img.shields.io/badge/license-GPLv3-blue.svg
