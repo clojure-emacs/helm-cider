@@ -43,6 +43,8 @@ Calling `cider-apropos-documentation` or `cider-apropos-documentation-select` br
 
 Select a namespace as with normal apropos.
 
+If customizable variable `helm-cider-apropos-full-doc` is `t`, show full instead of short documentation. Toggle between full/short documentation with `C-]`.
+
 ![Apropos documentation](./doc/apropos-documentation.png)
 
 ### Namespaces
