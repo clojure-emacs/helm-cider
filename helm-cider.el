@@ -294,6 +294,17 @@ documentation is used."
     keymap)
   "Keymap for use with `helm-cider-apropos-symbol-doc'.")
 
+(defun helm-cider--apropos-persistent-action (candidate)
+  "Persistent action for Helm CIDER apropos."
+  (if (and (helm-attr 'doc-lookup-p)
+           (string= candidate (helm-attr 'current-candidate)))
+      (progn
+        (kill-buffer cider-doc-buffer)
+        (helm-attrset 'doc-lookup-p nil))
+    (cider-doc-lookup candidate)
+    (helm-attrset 'doc-lookup-p t))
+  (helm-attrset 'current-candidate candidate))
+
 (defun helm-cider--apropos-source (ns &optional dicts doc full-doc follow)
   "Helm source for namespace NS (e.g. \"clojure.core\").
 
@@ -326,7 +337,7 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
               helm-cider--apropos-map)
     :multiline doc
     :nomark t
-    :persistent-action #'cider-doc-lookup
+    :persistent-action #'helm-cider--apropos-persistent-action
     :persistent-help "Look up documentation"
     :volatile t))
 
@@ -373,7 +384,7 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
     :follow (when follow 1)
     :keymap helm-cider--apropos-ns-map
     :nomark t
-    :persistent-action #'cider-doc-lookup
+    :persistent-action #'helm-cider--apropos-persistent-action
     :persistent-help "Look up documentation"
     :volatile t))
 
