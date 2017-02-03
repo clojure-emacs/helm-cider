@@ -327,6 +327,7 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
     :multiline doc
     :nomark t
     :persistent-action #'cider-doc-lookup
+    :persistent-help "Look up documentation"
     :volatile t))
 
 (defun helm-cider--apropos-sources (&optional excluded-ns doc full-doc)
@@ -373,6 +374,7 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
     :keymap helm-cider--apropos-ns-map
     :nomark t
     :persistent-action #'cider-doc-lookup
+    :persistent-help "Look up documentation"
     :volatile t))
 
 (defun helm-cider--resolve-symbol (&optional ns symbol)
