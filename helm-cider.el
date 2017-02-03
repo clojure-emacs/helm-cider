@@ -470,6 +470,7 @@ the default selection."
   (interactive)
   (cider-ensure-connected)
   (helm :buffer "*Helm Clojure Namespaces*"
+        :candidate-number-limit 9999
         :preselect (helm-cider--regexp-symbol
                     (helm-cider--symbol-ns (or ns-or-qualified-name "")))
         :sources (helm-cider--apropos-ns-source)))
