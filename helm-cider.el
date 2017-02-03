@@ -91,6 +91,11 @@ itself, e.g. \"cider.nrepl.middleware.apropos\") are excluded."
   :group 'helm-cider-apropos
   :type '(alist :key-type string :value-type function))
 
+(defcustom helm-cider-apropos-full-doc nil
+  "If true, use full documentation in `helm-cider-apropos-symbol-doc'."
+  :group 'helm-cider-apropos
+  :type 'boolean)
+
 (defcustom helm-cider-apropos-ns-key "C-c n"
   "String representation of key sequence for executing
 `helm-cider-apropos-ns'.
@@ -184,13 +189,16 @@ that is a prefix of NS, excluding the \"*\"."
                 (string= ns ex))
         (throw 'excluded t)))))
 
-(defun helm-cider--apropos-dicts (&optional excluded-ns)
+(defun helm-cider--apropos-dicts (&optional excluded-ns full-doc)
   "List of apropos results (nREPL dicts).
 
-Symbols in namespaces in EXCLUDED-NS are excluded.  If not
-supplied, `helm-cider-apropos-excluded-ns' is used."
+Optional argument EXCLUDED-NS is a list of ns for which symbols
+are excluded.  If not supplied, `helm-cider-apropos-excluded-ns'
+is used.
+
+Optional argument FULL-DOC, if t, retrieves full documentation."
   (cl-loop with excluded-ns = (or excluded-ns helm-cider-apropos-excluded-ns)
-           for dict in (cider-sync-request:apropos "")
+           for dict in (cider-sync-request:apropos "" nil full-doc)
            unless (helm-cider--excluded-ns-p (helm-cider--symbol-ns (nrepl-dict-get dict "name"))
                                              excluded-ns)
            collect dict))
@@ -215,10 +223,13 @@ DICT is an nREPL dict."
                       'face (helm-cider--symbol-face type))
           name)))
 
-(defun helm-cider--apropos-doc-candidate (dict)
+(defun helm-cider--apropos-doc-candidate (dict &optional full-doc)
   "Create a Helm apropos doc candidate.
 
-DICT is an nREPL dict."
+DICT is an nREPL dict.
+
+Optional argument FULL-DOC, when t, indicates that full
+documentation is used."
   (nrepl-dbind-response dict (name type doc)
     (with-temp-buffer
       ;; Name
@@ -227,7 +238,9 @@ DICT is an nREPL dict."
       ;; Doc
       (let ((beg (point)))
         (insert doc "\n")
-        (fill-region beg (point-max)))
+        ;; Short doc is not already filled; full doc is
+        (when (not full-doc)
+          (fill-region beg (point-max))))
       ;; Candidate
       (cons (buffer-string) name))))
 
@@ -264,9 +277,24 @@ DICT is an nREPL dict."
              (helm-cider-apropos-symbol (helm-cider--symbol-ns candidate)
                                         (helm-cider--symbol-name candidate)))))))
     keymap)
-  "Return a keymap for use with `helm-cider-apropos'.")
+  "Keymap for use with `helm-cider-apropos-symbol'.")
 
-(defun helm-cider--apropos-source (ns &optional dicts doc follow)
+(defvar helm-cider--apropos-doc-map
+  (let ((keymap (copy-keymap helm-cider--apropos-map)))
+    ;; Toggle full documentation
+    (define-key keymap (kbd "C-]")
+      (lambda ()
+        (interactive)
+        (helm-exit-and-execute-action
+         (lambda (candidate)
+           (customize-set-value 'helm-cider-apropos-full-doc
+                                (not helm-cider-apropos-full-doc))
+           (helm-cider-apropos-symbol-doc (helm-cider--symbol-ns candidate)
+                                          (helm-cider--symbol-name candidate))))))
+    keymap)
+  "Keymap for use with `helm-cider-apropos-symbol-doc'.")
+
+(defun helm-cider--apropos-source (ns &optional dicts doc full-doc follow)
   "Helm source for namespace NS (e.g. \"clojure.core\").
 
 DICTS is a list of apropos results (nREPL dicts) for
@@ -274,6 +302,10 @@ NS. If not supplied, it is obtained with
 `cider-sync-request:apropos'.
 
 If DOC is true, include symbol documentation in candidates.
+
+If FULL-DOC is true, full documentation is used; candidates may
+need to be treated differently by
+`helm-cider--apropos-doc-candidate'.
 
 If FOLLOW is true, use function `helm-follow-mode' for source."
   (helm-build-sync-source ns
@@ -283,29 +315,34 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
                                          (string< (cdr a) (cdr b)))
                                        candidates))
     :candidates (let ((fn (if doc
-                              #'helm-cider--apropos-doc-candidate
+                              (lambda (dict)
+                                (helm-cider--apropos-doc-candidate dict full-doc))
                             #'helm-cider--apropos-candidate)))
                   (mapcar fn (or dicts
-                                 (cider-sync-request:apropos "" ns))))
+                                 (cider-sync-request:apropos "" ns doc))))
     :follow (when follow 1)
-    :keymap helm-cider--apropos-map
+    :keymap (if doc
+                helm-cider--apropos-doc-map
+              helm-cider--apropos-map)
     :multiline doc
     :nomark t
     :persistent-action #'cider-doc-lookup
     :volatile t))
 
-(defun helm-cider--apropos-sources (&optional excluded-ns doc)
+(defun helm-cider--apropos-sources (&optional excluded-ns doc full-doc)
   "A list of Helm sources for apropos.
 
 Each source is the set of symbols in a namespace.  Namespaces in
 EXCLUDED-NS are excluded.  If not supplied,
 `helm-cider-apropos-excluded-ns' is used.
 
-If DOC is true, include symbol documentation in candidates."
+If DOC is true, include symbol documentation in candidates.
+
+If FULL-DOC is true, include full instead of short documentation."
   (cl-loop with ht = (helm-cider--apropos-hashtable
-                      (helm-cider--apropos-dicts excluded-ns))
+                      (helm-cider--apropos-dicts excluded-ns full-doc))
            for ns being the hash-keys in ht using (hash-value dicts)
-           collect (helm-cider--apropos-source ns dicts doc helm-cider-apropos-follow)
+           collect (helm-cider--apropos-source ns dicts doc full-doc helm-cider-apropos-follow)
            into sources
            finally (return (sort sources (helm-cider--make-sort-sources-fn)))))
 
@@ -357,7 +394,7 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
 ;;;;; Apropos
 
 ;;;###autoload
-(defun helm-cider-apropos-symbol (&optional ns symbol doc)
+(defun helm-cider-apropos-symbol (&optional ns symbol doc full-doc)
   "Choose Clojure symbols across namespaces.
 
 Each Helm source is a Clojure namespace (ns), and candidates are
@@ -377,8 +414,10 @@ selection line on candidate matching symbol at point.
 
 If DOC is true, include symbol documentation in candidate.
 
-Set `helm-cider-apropos-follow' to true to turn on
-function `helm-follow-mode' for all sources.  This is useful for quickly
+If FULL-DOC is true, include full instead of short documentation.
+
+Set `helm-cider-apropos-follow' to true to turn on function
+`helm-follow-mode' for all sources.  This is useful for quickly
 browsing documentation."
   (interactive)
   (cider-ensure-connected)
@@ -395,7 +434,7 @@ browsing documentation."
             (recenter 1))))
       (helm :buffer "*Helm Clojure Symbols*"
             :candidate-number-limit 9999
-            :sources (helm-cider--apropos-sources nil doc)))))
+            :sources (helm-cider--apropos-sources nil doc full-doc)))))
 
 ;;;###autoload
 (defun helm-cider-apropos-symbol-doc (&optional ns symbol)
@@ -404,7 +443,7 @@ browsing documentation."
 Optional arguments NS and SYMBOL are as in
 `helm-cider-apropos-symbol'."
   (interactive)
-  (helm-cider-apropos-symbol ns symbol t))
+  (helm-cider-apropos-symbol ns symbol t helm-cider-apropos-full-doc))
 
 ;;;###autoload
 (defun helm-cider-apropos-ns (&optional ns-or-qualified-name)
