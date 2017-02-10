@@ -105,7 +105,7 @@ itself, e.g. \"cider.nrepl.middleware.apropos\") are excluded."
 This is intended to be added to the keymap for
 `helm-cider-apropos'."
   :group 'helm-cider-apropos
-  :type 'string)
+  :type 'key-sequence)
 
 (defcustom helm-cider-apropos-symbol-doc-key "S-<return>"
   "String representation of key sequence of executing
@@ -114,7 +114,7 @@ This is intended to be added to the keymap for
 This is intended to be added to the keymap for
 `helm-cider-apropos-ns.'"
   :group 'helm-cider-apropos
-  :type 'string)
+  :type 'key-sequence)
 
 
 ;;;; Utilities
