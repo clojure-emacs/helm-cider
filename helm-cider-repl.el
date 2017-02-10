@@ -33,7 +33,8 @@
 (defgroup helm-cider-repl nil
   "Helm interface to CIDER REPL."
   :prefix "helm-cider-repl-"
-  :group 'helm-cider)
+  :group 'helm-cider
+  :tag "Helm CIDER REPL")
 
 (defcustom helm-cider-repl-history-max-lines 5
   "Max number of lines displayed per candidate in CIDER REPL history browser.

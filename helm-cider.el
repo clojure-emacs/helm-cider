@@ -44,14 +44,16 @@
 (defgroup helm-cider nil
   "Helm interface to CIDER."
   :prefix "helm-cider-"
-  :group 'cider)
+  :group 'cider
+  :tag "Helm CIDER")
 
 ;;;;; Apropos
 
 (defgroup helm-cider-apropos nil
   "Helm CIDER apropos"
   :prefix "helm-cider-apropos-"
-  :group 'helm-cider)
+  :group 'helm-cider
+  :tag "Helm CIDER Apropos")
 
 (defcustom helm-cider-apropos-excluded-ns '("cider.*")
   "List of namespaces to exclude from apropos.
