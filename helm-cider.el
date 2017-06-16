@@ -144,7 +144,7 @@ Default value of SOURCES is `helm-sources'."
                      (or sources helm-sources))))
 
 (defun helm-cider--symbol-name (qualified-name)
-  "Get the name porition of the fully qualified symbol name
+  "Get the name portion of the fully qualified symbol name
 QUALIFIED-NAME (e.g. \"reduce\" for \"clojure.core/reduce\")."
   (cadr (split-string qualified-name "/")))
 
