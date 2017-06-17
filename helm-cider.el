@@ -337,9 +337,11 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
   (helm-build-sync-source ns
     :action helm-cider-apropos-actions
     :candidate-transformer (lambda (candidates)
-                             (seq-sort (lambda (a b)
-                                         (string< (cdr a) (cdr b)))
-                                       candidates))
+                             (cl-flet ((a-z (a b)
+                                            (let ((n1 (helm-cider--symbol-name (cdr a)))
+                                                  (n2 (helm-cider--symbol-name (cdr b))))
+                                              (string< n1 n2))))
+                               (seq-sort #'a-z candidates)))
     :candidates (let ((fn (if doc
                               (lambda (dict)
                                 (helm-cider--apropos-doc-candidate dict full-doc))
