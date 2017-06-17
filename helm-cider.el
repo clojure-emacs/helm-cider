@@ -145,14 +145,24 @@ Default value of SOURCES is `helm-sources'."
 
 (defun helm-cider--symbol-name (qualified-name)
   "Get the name portion of the fully qualified symbol name
-QUALIFIED-NAME (e.g. \"reduce\" for \"clojure.core/reduce\")."
-  (cadr (split-string qualified-name "/")))
+QUALIFIED-NAME (e.g. \"reduce\" for \"clojure.core/reduce\").
+
+Defaults to QUALIFIED-NAME if name is NOT qualified (as is the
+case for special forms)."
+  (if (string-match-p "/" qualified-name)
+      (cadr (split-string qualified-name "/"))
+    qualified-name))
 
 (defun helm-cider--symbol-ns (qualified-name)
   "Get the namespace portion of the fully qualified symbol name
 QUALIFIED-NAME (e.g. \"clojure.core\" for
-\"clojure.core/reduce\")."
-  (car (split-string qualified-name "/")))
+\"clojure.core/reduce\").
+
+Defaults to the `clojure.core' ns if name is NOT qualified (as is
+the case for special forms)."
+  (if (string-match-p "/" qualified-name)
+      (car (split-string qualified-name "/"))
+    "clojure.core"))
 
 (defun helm-cider--symbol-face (type)
   "Face for symbol of TYPE.
@@ -161,6 +171,7 @@ TYPE values include \"function\", \"macro\", etc."
   (pcase type
     ("function" 'font-lock-function-name-face)
     ("macro" 'font-lock-keyword-face)
+    ("special-form" 'font-lock-keyword-face)
     ("variable" 'font-lock-variable-name-face)))
 
 (defun helm-cider--make-sort-sources-fn (&optional descending)
@@ -203,6 +214,8 @@ Optional argument FULL-DOC, if t, retrieves full documentation."
            for dict in (cider-sync-request:apropos "" nil full-doc)
            unless (helm-cider--excluded-ns-p (helm-cider--symbol-ns (nrepl-dict-get dict "name"))
                                              excluded-ns)
+           do (unless (nrepl-dict-contains dict "ns")
+                (nrepl-dict-put dict "ns" "clojure.core"))
            collect dict))
 
 (defun helm-cider--apropos-hashtable (dicts)
