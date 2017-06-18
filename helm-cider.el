@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
-;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.4") (seq "1.0"))
+;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.4"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
 ;; Version: 0.3.0
@@ -37,7 +37,6 @@
 (require 'helm-lib)
 (require 'helm-multi-match)
 (require 'helm-source)
-(require 'seq)
 
 
 ;;;; Customize
@@ -341,7 +340,7 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
                                             (let ((n1 (helm-cider--symbol-name (cdr a)))
                                                   (n2 (helm-cider--symbol-name (cdr b))))
                                               (string< n1 n2))))
-                               (seq-sort #'a-z candidates)))
+                               (sort (copy-sequence candidates) #'a-z)))
     :candidates (let ((fn (if doc
                               (lambda (dict)
                                 (helm-cider--apropos-doc-candidate dict full-doc))
