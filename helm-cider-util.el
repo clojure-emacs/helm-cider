@@ -91,14 +91,6 @@ TYPE values include \"function\", \"macro\", etc."
     ("special-form" 'font-lock-keyword-face)
     ("variable" 'font-lock-variable-name-face)))
 
-(defun helm-cider--make-sort-sources-fn (&optional descending)
-  "Sort Helm sources by name in ascending order.
-
-If DESCENDING is true, sort in descending order."
-  (let ((fn (if descending (lambda (a b) (string< b a)) #'string<)))
-    (lambda (s1 s2)
-      (funcall fn (assoc-default 'name s1) (assoc-default 'name s2)))))
-
 
 (provide 'helm-cider-util)
 

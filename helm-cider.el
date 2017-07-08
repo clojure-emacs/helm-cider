@@ -302,12 +302,15 @@ EXCLUDED-NS are excluded.  If not supplied,
 If DOC is true, include symbol documentation in candidates.
 
 If FULL-DOC is true, include full instead of short documentation."
-  (cl-loop with ht = (helm-cider--apropos-hashtable
-                      (helm-cider--apropos-dicts excluded-ns full-doc))
-           for ns being the hash-keys in ht using (hash-value dicts)
-           collect (helm-cider--apropos-source ns dicts doc full-doc helm-cider-apropos-follow)
-           into sources
-           finally (return (sort sources (helm-cider--make-sort-sources-fn)))))
+  (cl-flet ((source-compare (s1 s2)
+                            (string< (assoc-default 'name s1)
+                                     (assoc-default 'name s2)) ))
+    (cl-loop with ht = (helm-cider--apropos-hashtable
+                        (helm-cider--apropos-dicts excluded-ns full-doc))
+             for ns being the hash-keys in ht using (hash-value dicts)
+             collect (helm-cider--apropos-source ns dicts doc full-doc helm-cider-apropos-follow)
+             into sources
+             finally (return (sort sources #'source-compare)))))
 
 (defvar helm-cider--apropos-ns-map
   (let ((keymap (copy-keymap helm-map)))
