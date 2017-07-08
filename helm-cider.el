@@ -34,6 +34,7 @@
 (require 'cl-lib)
 (require 'helm)
 (require 'helm-cider-repl)
+(require 'helm-cider-util)
 (require 'helm-lib)
 (require 'helm-multi-match)
 (require 'helm-source)
@@ -114,72 +115,6 @@ This is intended to be added to the keymap for
 `helm-cider-apropos-ns.'"
   :group 'helm-cider-apropos
   :type 'key-sequence)
-
-
-;;;; Utilities
-
-(defun helm-cider--regexp-symbol (string)
-  "Create a regexp that matches STRING as a symbol.
-
-If STRING ends in a character that `helm-major-mode' does not
-consider to be in the word or symbol syntax class, do not include
-a symbol-end \(\\_>\); otherwise, the regexp wouldn't match."
-  (if (not (string= "" string))
-      (let* ((lchar (aref string (1- (length string))))
-             (symbol-end (with-syntax-table helm-major-mode-syntax-table
-                           (if (or (= ?w (char-syntax lchar))
-                                   (= ?_ (char-syntax lchar)))
-                               "\\_>"
-                             ""))))
-        (concat "\\_<" (regexp-quote (or string "")) symbol-end))
-    ""))
-
-(defun helm-cider--source-by-name (name &optional sources)
-  "Get a Helm source in SOURCES by NAME.
-
-Default value of SOURCES is `helm-sources'."
-  (car (cl-member-if (lambda (source)
-                       (string= name (assoc-default 'name source)))
-                     (or sources helm-sources))))
-
-(defun helm-cider--symbol-name (qualified-name)
-  "Get the name portion of the fully qualified symbol name
-QUALIFIED-NAME (e.g. \"reduce\" for \"clojure.core/reduce\").
-
-Defaults to QUALIFIED-NAME if name is NOT qualified (as is the
-case for special forms)."
-  (if (string-match-p "/" qualified-name)
-      (cadr (split-string qualified-name "/"))
-    qualified-name))
-
-(defun helm-cider--symbol-ns (qualified-name)
-  "Get the namespace portion of the fully qualified symbol name
-QUALIFIED-NAME (e.g. \"clojure.core\" for
-\"clojure.core/reduce\").
-
-Defaults to the `clojure.core' ns if name is NOT qualified (as is
-the case for special forms)."
-  (if (string-match-p "/" qualified-name)
-      (car (split-string qualified-name "/"))
-    "clojure.core"))
-
-(defun helm-cider--symbol-face (type)
-  "Face for symbol of TYPE.
-
-TYPE values include \"function\", \"macro\", etc."
-  (pcase type
-    ("function" 'font-lock-function-name-face)
-    ("macro" 'font-lock-keyword-face)
-    ("special-form" 'font-lock-keyword-face)
-    ("variable" 'font-lock-variable-name-face)))
-
-(defun helm-cider--make-sort-sources-fn (&optional descending)
-  "Sort Helm sources by name in ascending order.
-
-If DESCENDING is true, sort in descending order."
-  (let ((fn (if descending (lambda (a b) (string< b a)) #'string<)))
-    (lambda (s1 s2)
-      (funcall fn (assoc-default 'name s1) (assoc-default 'name s2)))))
 
 
 ;;;; Apropos
