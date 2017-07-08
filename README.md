@@ -55,6 +55,22 @@ Use `RET` to select a namespace and view symbols in that namespace *without* doc
 
 ![Browse namespaces](./doc/browse-ns.png)
 
+### Specs
+
+Calling `helm-cider-spec` brings up a Helm buffer of all spec names across all namespaces.
+
+Each Helm source is a namespace. To select a namespace, use `C-c n` (the default value of `helm-cider-spec-ns-key`) and select the desired namespace.
+
+![Specs](./doc/specs.png)
+
+### Spec namespaces
+
+Calling `helm-cider-spec-ns` brings up a Helm buffer of [spec](https://clojure.org/about/spec) namespaces.
+
+Use `RET` to select a namespace and view spec names in that namespace.
+
+![Spec namespaces](./doc/spec-ns.png)
+
 ### REPL history
 
 Calling `helm-cider-repl-history` (bound to `C-c C-l` by default) in a CIDER REPL brings up a Helm buffer of REPL entries.
