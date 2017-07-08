@@ -32,18 +32,25 @@
 (defun helm-cider--regexp-symbol (string)
   "Create a regexp that matches STRING as a symbol.
 
-If STRING ends in a character that `helm-major-mode' does not
+If STRING starts with a character that `helm-major-mode' does not
 consider to be in the word or symbol syntax class, do not include
-a symbol-end \(\\_>\); otherwise, the regexp wouldn't match."
-  (if (not (string= "" string))
-      (let* ((lchar (aref string (1- (length string))))
-             (symbol-end (with-syntax-table helm-major-mode-syntax-table
-                           (if (or (= ?w (char-syntax lchar))
-                                   (= ?_ (char-syntax lchar)))
-                               "\\_>"
-                             ""))))
-        (concat "\\_<" (regexp-quote (or string "")) symbol-end))
-    ""))
+a symbol-start \(\\_<\); otherwise, the regexp wouldn't
+match. Same for symbol-start."
+  (if (string-empty-p string)
+      ""
+    (let* ((fchar (aref string 0))
+           (lchar (aref string (1- (length string))))
+           (symbol-start (with-syntax-table helm-major-mode-syntax-table
+                           (if (or (= ?w (char-syntax fchar))
+                                   (= ?_ (char-syntax fchar)))
+                               "\\_<"
+                             "")))
+           (symbol-end (with-syntax-table helm-major-mode-syntax-table
+                         (if (or (= ?w (char-syntax lchar))
+                                 (= ?_ (char-syntax lchar)))
+                             "\\_>"
+                           ""))))
+      (concat symbol-start (regexp-quote string) symbol-end))))
 
 (defun helm-cider--source-by-name (name &optional sources)
   "Get a Helm source in SOURCES by NAME.
