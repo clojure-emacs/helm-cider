@@ -38,6 +38,16 @@
   :group 'helm-cider
   :tag "Helm CIDER Spec")
 
+(defcustom helm-cider-spec-ns-compare-fn
+  #'helm-cider-spec--ns-compare-fn
+  "Function to compare spec namespaces for sorting.
+
+Comparison function takes two arguments, ns-1 and ns-2.  If ns-1
+< ns-2, it appears earlier as a Helm source in `helm-cider-spec'
+and candidate in `helm-cider-spec-ns'."
+  :group 'helm-cider-spec
+  :type 'function)
+
 (defcustom helm-cider-spec-ns-key "C-c n"
   "String representation of key sequence for executing
 `helm-cider-spec-ns'.
@@ -144,8 +154,9 @@ Optional argument SPEC-NAMES is a list of spec keyword strings.
 If not supplied, it is retrieved with
 `cider-sync-request:spec-list'."
   (cl-flet ((source-compare (s1 s2)
-                            (helm-cider-spec--ns-compare-fn (assoc-default 'name s1)
-                                                            (assoc-default 'name s2))))
+              (funcall (symbol-value 'helm-cider-spec-ns-compare-fn)
+                       (assoc-default 'name s1)
+                       (assoc-default 'name s2))))
     (cl-loop with ht = (helm-cider-spec--hashtable (or spec-names
                                                        (cider-sync-request:spec-list "")))
              for ns being the hash-keys in ht using (hash-value names)
@@ -187,7 +198,7 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
     :action helm-cider-spec-ns-actions
     :candidates (cl-loop for ns in (helm-cider-spec--all-ns)
                          collect (helm-cider-spec--propertize-ns ns) into all
-                         finally (return (sort all #'helm-cider-spec--ns-compare-fn)))
+                         finally (return (sort all helm-cider-spec-ns-compare-fn)))
     :follow (when follow 1)
     :nomark t
     :persistent-action #'ignore
