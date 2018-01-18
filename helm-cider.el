@@ -452,7 +452,8 @@ If ARG is raw prefix argument \\[universal-argument]
     (cider-apropos-documentation . helm-cider-apropos-symbol-doc)
     (cider-apropos-documentation-select . helm-cider-apropos-symbol-doc)
     (cider-browse-ns . helm-cider-apropos-ns)
-    (cider-browse-ns-all . helm-cider-apropos-ns))
+    (cider-browse-ns-all . helm-cider-apropos-ns)
+    (cider-browse-spec-all . helm-cider-spec))
   "Alist of CIDER functions and Helm versions replacing them."
   :group 'helm-cider
   :type '(alist :key-type symbol :value-type symbol))
