@@ -34,6 +34,7 @@
 (require 'cl-lib)
 (require 'helm)
 (require 'helm-cider-repl)
+(require 'helm-cider-spec)
 (require 'helm-cider-util)
 (require 'helm-lib)
 (require 'helm-multi-match)
