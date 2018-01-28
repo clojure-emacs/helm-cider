@@ -105,6 +105,14 @@ TYPE values include \"function\", \"macro\", etc."
     (helm-attrset 'doc-lookup-p t))
   (helm-attrset 'current-candidate candidate))
 
+(defvar helm-cider--doc-actions
+  (helm-make-actions
+   "CiderDoc" #'cider-doc-lookup
+   "Find definition" (lambda (candidate)
+                       (cider-find-var nil candidate))
+   "Find on Grimoire" 'cider-grimoire-lookup)
+  "Actions for looking up symbol's documentation.")
+
 
 (provide 'helm-cider-util)
 
