@@ -81,6 +81,14 @@ Use `f2` to delete an entry from history. Multiple entries can be marked and del
 
 ![REPL History](./doc/repl-history.png)
 
+### Clojure cheatsheet
+
+Calling `helm-cider-cheatsheet` brings up a Clojure cheatsheet. This is largely a port of @krisajenkins's [`clojure-cheatsheet`](https://github.com/clojure-emacs/clojure-cheatsheet).
+
+Matches are against both candidates and categories. For example, `arith` will match against the `Primitives : Numbers : Arithmetic` category.
+
+![Clojure cheatsheet](./doc/cheatsheet.png)
+
 ## See Also
 
 - CIDER issue [#1541](https://github.com/clojure-emacs/cider/issues/1541), regarding [Ido](https://www.gnu.org/software/emacs/manual/html_mono/ido.html)/Helm support for `apropos`.

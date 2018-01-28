@@ -92,6 +92,14 @@ TYPE values include \"function\", \"macro\", etc."
     ("special-form" 'font-lock-keyword-face)
     ("variable" 'font-lock-variable-name-face)))
 
+(defun helm-cider--var-type-from-info (dict)
+  "Return var's type from info dict."
+  (cond
+    ((nrepl-dict-contains dict "special-form") "special-form")
+    ((nrepl-dict-contains dict "macro") "macro")
+    ((nrepl-dict-contains dict "arglists-str") "function")
+    (t "variable")))
+
 (defun helm-cider--doc-lookup-persistent-action (candidate)
   "Persistent action calling `cider-doc-lookup' on CANDIDATE."
   (cider-ensure-connected)
