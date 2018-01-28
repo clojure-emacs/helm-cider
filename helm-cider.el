@@ -6,7 +6,7 @@
 ;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.4"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
-;; Version: 0.3.0
+;; Version: 0.4.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
