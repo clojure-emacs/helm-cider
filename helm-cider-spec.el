@@ -87,10 +87,11 @@ Keys are kw namespaces and values are lists of names."
     (dolist (name spec-names)
       (let ((ns (helm-cider--symbol-ns name)))
         (puthash ns (cons name (gethash ns ht)) ht)))
-    (cl-loop for ns being the hash-keys of ht
-             using (hash-value names)
-             do (setf (gethash ns ht) (sort names #'string<))
-             finally (return ht))))
+    (cl-loop
+       for ns being the hash-keys of ht
+       using (hash-value names)
+       do (setf (gethash ns ht) (sort names #'string<))
+       finally (return ht))))
 
 (defun helm-cider-spec--candidate (spec-name)
   "Create a Helm CIDER spec candidate.
@@ -157,12 +158,13 @@ If not supplied, it is retrieved with
               (funcall (symbol-value 'helm-cider-spec-ns-compare-fn)
                        (assoc-default 'name s1)
                        (assoc-default 'name s2))))
-    (cl-loop with ht = (helm-cider-spec--hashtable (or spec-names
-                                                       (cider-sync-request:spec-list "")))
-             for ns being the hash-keys in ht using (hash-value names)
-             collect (helm-cider-spec--source ns names helm-cider-spec-follow)
-             into sources
-             finally (return (sort sources #'source-compare)))))
+    (cl-loop
+       with ht = (helm-cider-spec--hashtable (or spec-names
+                                                 (cider-sync-request:spec-list "")))
+       for ns being the hash-keys in ht using (hash-value names)
+       collect (helm-cider-spec--source ns names helm-cider-spec-follow)
+       into sources
+       finally (return (sort sources #'source-compare)))))
 
 (defun helm-cider-spec--all-ns ()
   "Return a list of all spec namespace strings.
@@ -196,9 +198,10 @@ Namespaces in EXCLUDED-NS are excluded.  If not supplied,
 If FOLLOW is true, use function `helm-follow-mode' for source."
   (helm-build-sync-source "Clojure Spec Namespaces"
     :action helm-cider-spec-ns-actions
-    :candidates (cl-loop for ns in (helm-cider-spec--all-ns)
-                         collect (helm-cider-spec--propertize-ns ns) into all
-                         finally (return (sort all helm-cider-spec-ns-compare-fn)))
+    :candidates (cl-loop
+                   for ns in (helm-cider-spec--all-ns)
+                   collect (helm-cider-spec--propertize-ns ns) into all
+                   finally (return (sort all helm-cider-spec-ns-compare-fn)))
     :follow (when follow 1)
     :nomark t
     :persistent-action #'ignore
