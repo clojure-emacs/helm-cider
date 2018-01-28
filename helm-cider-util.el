@@ -23,6 +23,7 @@
 
 ;;; Code:
 
+(require 'cider)
 (require 'cl-lib)
 (require 'subr-x)
 
@@ -90,6 +91,19 @@ TYPE values include \"function\", \"macro\", etc."
     ("macro" 'font-lock-keyword-face)
     ("special-form" 'font-lock-keyword-face)
     ("variable" 'font-lock-variable-name-face)))
+
+(defun helm-cider--doc-lookup-persistent-action (candidate)
+  "Persistent action calling `cider-doc-lookup' on CANDIDATE."
+  (cider-ensure-connected)
+  (cider-ensure-op-supported "info")
+  (if (and (helm-attr 'doc-lookup-p)
+           (string= candidate (helm-attr 'current-candidate)))
+      (progn
+        (kill-buffer cider-doc-buffer)
+        (helm-attrset 'doc-lookup-p nil))
+    (cider-doc-lookup candidate)
+    (helm-attrset 'doc-lookup-p t))
+  (helm-attrset 'current-candidate candidate))
 
 
 (provide 'helm-cider-util)
