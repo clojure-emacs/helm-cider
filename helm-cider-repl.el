@@ -41,8 +41,9 @@
 
 If not a positive integer, don't truncate candidate, show all."
   :group 'helm-cider-repl
-  :type '(choice (const :tag "Disabled" nil)
-                 (integer :tag "Max number of lines")))
+  :type '(choice
+          (const :tag "Disabled" nil)
+          (integer :tag "Max number of lines")))
 
 (defcustom helm-cider-repl-history-actions
   (helm-make-actions
@@ -74,35 +75,37 @@ If not a positive integer, don't truncate candidate, show all."
   "Candidates for Helm CIDER REPL history.
 
 Blank and duplicate candidates are excluded."
-  (cl-loop for c in (helm-fast-remove-dups cider-repl-input-history :test 'equal)
-           unless (string-blank-p c)
-           collect c))
+  (cl-loop
+     for c in (helm-fast-remove-dups cider-repl-input-history :test 'equal)
+     unless (string-blank-p c)
+     collect c))
 
 (defun helm-cider-repl--history-transformer (candidates _source)
   "Display only the `helm-cider-repl-history-max-lines'
 lines of candidate."
-  (cl-loop for c in candidates
-           for m = helm-cider-repl-history-max-lines
-           when (get-text-property 0 'read-only c)
-           do (set-text-properties 0 (length c) '(read-only nil) c)
-           for n = (with-temp-buffer (insert c) (count-lines (point-min) (point-max)))
-           if (and (integerp m)
-                   (> n m 0))
-           collect (cons (with-temp-buffer
-                           (insert c)
-                           (goto-char (point-min))
-                           (concat
-                            (buffer-substring
-                             (point-min)
-                             (save-excursion
-                               (forward-line helm-cider-repl-history-max-lines)
-                               (point)))
-                            "[...]"))
-                         c)
-           ;; Need to collect a cons b/c persistent action is executed on
-           ;; unpropertied string otherwise
-           ;; See: https://github.com/emacs-helm/helm/blob/v2.4.0/helm.el#L4999
-           else collect (cons c c)))
+  (cl-loop
+     for c in candidates
+     for m = helm-cider-repl-history-max-lines
+     when (get-text-property 0 'read-only c)
+     do (set-text-properties 0 (length c) '(read-only nil) c)
+     for n = (with-temp-buffer (insert c) (count-lines (point-min) (point-max)))
+     if (and (integerp m)
+             (> n m 0))
+     collect (cons (with-temp-buffer
+                     (insert c)
+                     (goto-char (point-min))
+                     (concat
+                      (buffer-substring
+                       (point-min)
+                       (save-excursion
+                         (forward-line helm-cider-repl-history-max-lines)
+                         (point)))
+                      "[...]"))
+                   c)
+     ;; Need to collect a cons b/c persistent action is executed on
+     ;; unpropertied string otherwise
+     ;; See: https://github.com/emacs-helm/helm/blob/v2.4.0/helm.el#L4999
+     else collect (cons c c)))
 
 (defun helm-cider-repl--history-preview (candidate)
   "Preview the CIDER REPL history candidate in a temp buffer.
@@ -111,10 +114,10 @@ Useful when the candidate longer than `helm-cider-repl-history-max-lines' lines.
 
   (let ((buf (get-buffer-create "*Helm CIDER REPL History Preview*")))
     (cl-flet ((preview (candidate)
-                       (switch-to-buffer buf)
-                       (let ((inhibit-read-only t))
-                         (erase-buffer)
-                         (insert candidate))))
+                (switch-to-buffer buf)
+                (let ((inhibit-read-only t))
+                  (erase-buffer)
+                  (insert candidate))))
       (if (and (helm-attr 'previewp)
                (string= candidate (helm-attr 'current-candidate)))
           (progn
@@ -155,9 +158,10 @@ This function is meant to be one of `helm-cider-repl-history-actions'."
   "Delete marked candidates from `cider-repl-input-history'.
 
 This function is meant to be one of `helm-cider-repl-history-actions'."
-  (cl-loop for cand in (helm-marked-candidates)
-           do (setq cider-repl-input-history
-                    (delete cand cider-repl-input-history))))
+  (cl-loop
+     for cand in (helm-marked-candidates)
+     do (setq cider-repl-input-history
+              (delete cand cider-repl-input-history))))
 
 ;;;###autoload
 (defun helm-cider-repl-history ()

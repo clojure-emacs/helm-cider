@@ -141,13 +141,14 @@ are excluded.  If not supplied, `helm-cider-apropos-excluded-ns'
 is used.
 
 Optional argument FULL-DOC, if t, retrieves full documentation."
-  (cl-loop with excluded-ns = (or excluded-ns helm-cider-apropos-excluded-ns)
-           for dict in (cider-sync-request:apropos "" nil full-doc)
-           unless (helm-cider--excluded-ns-p (helm-cider--symbol-ns (nrepl-dict-get dict "name"))
-                                             excluded-ns)
-           do (unless (nrepl-dict-contains dict "ns")
-                (nrepl-dict-put dict "ns" "clojure.core"))
-           collect dict))
+  (cl-loop
+     with excluded-ns = (or excluded-ns helm-cider-apropos-excluded-ns)
+     for dict in (cider-sync-request:apropos "" nil full-doc)
+     unless (helm-cider--excluded-ns-p (helm-cider--symbol-ns (nrepl-dict-get dict "name"))
+                                       excluded-ns)
+     do (unless (nrepl-dict-contains dict "ns")
+          (nrepl-dict-put dict "ns" "clojure.core"))
+     collect dict))
 
 (defun helm-cider--apropos-hashtable (dicts)
   "Build a hash table from apropos results (DICTS).
@@ -258,9 +259,9 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
     :action helm-cider-apropos-actions
     :candidate-transformer (lambda (candidates)
                              (cl-flet ((a-z (a b)
-                                            (let ((n1 (helm-cider--symbol-name (cdr a)))
-                                                  (n2 (helm-cider--symbol-name (cdr b))))
-                                              (string< n1 n2))))
+                                         (let ((n1 (helm-cider--symbol-name (cdr a)))
+                                               (n2 (helm-cider--symbol-name (cdr b))))
+                                           (string< n1 n2))))
                                (sort (copy-sequence candidates) #'a-z)))
     :candidates (let ((fn (if doc
                               (lambda (dict)
@@ -289,14 +290,15 @@ If DOC is true, include symbol documentation in candidates.
 
 If FULL-DOC is true, include full instead of short documentation."
   (cl-flet ((source-compare (s1 s2)
-                            (string< (assoc-default 'name s1)
-                                     (assoc-default 'name s2)) ))
-    (cl-loop with ht = (helm-cider--apropos-hashtable
-                        (helm-cider--apropos-dicts excluded-ns full-doc))
-             for ns being the hash-keys in ht using (hash-value dicts)
-             collect (helm-cider--apropos-source ns dicts doc full-doc helm-cider-apropos-follow)
-             into sources
-             finally (return (sort sources #'source-compare)))))
+              (string< (assoc-default 'name s1)
+                       (assoc-default 'name s2)) ))
+    (cl-loop
+       with ht = (helm-cider--apropos-hashtable
+                  (helm-cider--apropos-dicts excluded-ns full-doc))
+       for ns being the hash-keys in ht using (hash-value dicts)
+       collect (helm-cider--apropos-source ns dicts doc full-doc helm-cider-apropos-follow)
+       into sources
+       finally (return (sort sources #'source-compare)))))
 
 (defvar helm-cider--apropos-ns-map
   (let ((keymap (copy-keymap helm-map)))
@@ -318,9 +320,9 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
   (helm-build-sync-source "Clojure Namespaces"
     :action helm-cider-apropos-ns-actions
     :candidates (cl-loop for ns in (cider-sync-request:ns-list)
-                         unless (helm-cider--excluded-ns-p ns excluded-ns)
-                         collect (cider-propertize ns 'ns) into all
-                         finally (return (sort all #'string<)))
+                   unless (helm-cider--excluded-ns-p ns excluded-ns)
+                   collect (cider-propertize ns 'ns) into all
+                   finally (return (sort all #'string<)))
     :follow (when follow 1)
     :keymap helm-cider--apropos-ns-map
     :nomark t
@@ -461,8 +463,7 @@ The old and new functions are those specified in
     (advice-remove (car pair) (symbol-function (cdr pair)))))
 
 ;;;###autoload
-(define-minor-mode helm-cider-mode
-  "Use Helm for CIDER."
+(define-minor-mode helm-cider-mode "Use Helm for CIDER."
   :global t
   (if helm-cider-mode
       (progn
