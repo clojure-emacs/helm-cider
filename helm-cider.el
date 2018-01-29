@@ -474,4 +474,5 @@ The old and new functions are those specified in
 
 
 (provide 'helm-cider)
+
 ;;; helm-cider.el ends here

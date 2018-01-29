@@ -116,4 +116,4 @@ TYPE values include \"function\", \"macro\", etc."
 
 (provide 'helm-cider-util)
 
-;;; cider-util.el ends here
+;;; helm-cider-util.el ends here
