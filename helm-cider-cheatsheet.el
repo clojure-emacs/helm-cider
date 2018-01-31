@@ -27,6 +27,7 @@
 ;;; Code:
 
 (require 'cider)
+(require 'cider-cheatsheet)
 (require 'cl-lib)
 (require 'helm)
 (require 'helm-multi-match)
