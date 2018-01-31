@@ -75,12 +75,11 @@ itself, e.g. \"cider.nrepl.middleware.apropos\") are excluded."
 
 (defcustom helm-cider-apropos-ns-actions
   (helm-make-actions
-   "Search in namespace" 'helm-cider-apropos-symbol
-   "Find definition" (lambda (ns)
-                       (cider-find-ns nil ns))
-   "CiderDoc" 'cider-doc-lookup
-   "Search in namespace with docs" 'helm-cider-apropos-symbol-doc
-   "Set REPL namespace" 'cider-repl-set-ns)
+   "Search in namespace" #'helm-cider-apropos-symbol
+   "Find definition" #'helm-cider--find-ns
+   "CiderDoc" (wrap-helm-cider-action cider-doc-lookup)
+   "Search in namespace with docs" #'helm-cider-apropos-symbol-doc
+   "Set REPL namespace" #'cider-repl-set-ns)
   "Actions for Helm apropos namespaces."
   :group 'helm-cider-apropos
   :type '(alist :key-type string :value-type function))

@@ -82,6 +82,12 @@ the case for special forms)."
       (car (split-string qualified-name "/"))
     "clojure.core"))
 
+(defun helm-cider--find-ns (ns)
+  (cider-find-ns nil ns))
+
+(defun helm-cider--find-var (var)
+  (cider-find-var nil var))
+
 (defun helm-cider--symbol-face (type)
   "Face for symbol of TYPE.
 
@@ -113,12 +119,21 @@ TYPE values include \"function\", \"macro\", etc."
     (helm-attrset 'doc-lookup-p t))
   (helm-attrset 'current-candidate candidate))
 
+(defmacro wrap-helm-cider-action (f &optional ops)
+  "Wrap Helm CIDER actions.
+
+- Ensure that CIDER is connected
+- Ensure ops are supported"
+  `(lambda (&rest args)
+     (cider-ensure-connected)
+     ,@(mapcar (lambda (op) `(cider-ensure-op-supported ,op)) ops)
+     (apply #',f args)))
+
 (defvar helm-cider--doc-actions
   (helm-make-actions
-   "CiderDoc" #'cider-doc-lookup
-   "Find definition" (lambda (candidate)
-                       (cider-find-var nil candidate))
-   "Find on Grimoire" 'cider-grimoire-lookup)
+   "CiderDoc" (wrap-helm-cider-action cider-doc-lookup)
+   "Find definition" (wrap-helm-cider-action helm-cider--find-var)
+   "Find on Grimoire" (wrap-helm-cider-action cider-grimoire-lookup))
   "Actions for looking up symbol's documentation.")
 
 
