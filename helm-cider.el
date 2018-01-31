@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
-;; Package-Requires: ((emacs "24.4") (cider "0.12") (helm-core "2.4"))
+;; Package-Requires: ((emacs "24.4") (cider "0.16") (helm-core "2.8"))
 ;; Keywords: tools, convenience
 ;; URL: https://github.com/clojure-emacs/helm-cider
 ;; Version: 0.4.0
