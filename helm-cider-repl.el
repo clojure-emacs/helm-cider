@@ -1,6 +1,6 @@
 ;;; helm-cider-repl.el --- Helm interface to CIDER REPL -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016 Tianxiang Xiong
+;; Copyright (C) 2016-2018 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
 

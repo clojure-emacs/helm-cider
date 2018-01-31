@@ -1,6 +1,6 @@
 ;;; helm-cider.el --- Helm interface to CIDER        -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016 Tianxiang Xiong
+;; Copyright (C) 2016-2018 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
 ;; Package-Requires: ((emacs "24.4") (cider "0.16") (helm-core "2.8"))

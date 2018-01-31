@@ -1,6 +1,6 @@
 ;;; helm-cider-cheatsheet.el --- Helm interface to CIDER cheatsheet -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018 Tianxiang Xiong
+;; Copyright (C) 2016-2018 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
 
