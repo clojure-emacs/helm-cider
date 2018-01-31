@@ -36,7 +36,7 @@
 If STRING starts with a character that `helm-major-mode' does not
 consider to be in the word or symbol syntax class, do not include
 a symbol-start \(\\_<\); otherwise, the regexp wouldn't
-match. Same for symbol-start."
+match. Same for symbol-end."
   (if (string-empty-p string)
       ""
     (let* ((fchar (aref string 0))
