@@ -466,6 +466,7 @@ The old and new functions are those specified in
 ;;;###autoload
 (define-minor-mode helm-cider-mode "Use Helm for CIDER."
   :global t
+  :require 'helm-cider
   (if helm-cider-mode
       (progn
         (helm-cider--override)
