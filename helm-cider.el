@@ -266,9 +266,7 @@ If FOLLOW is true, use function `helm-follow-mode' for source."
                             (cider-sync-request:apropos "" ns doc)))
                   (cl-sort #'string< :key (lambda (dict) (helm-cider--symbol-name (cdr dict)))))
     :follow (when follow 1)
-    :keymap (if doc
-                helm-cider--apropos-doc-map
-              helm-cider--apropos-map)
+    :keymap (if doc helm-cider--apropos-doc-map helm-cider--apropos-map)
     :multiline doc
     :nomark t
     :persistent-action #'helm-cider--doc-lookup-persistent-action
