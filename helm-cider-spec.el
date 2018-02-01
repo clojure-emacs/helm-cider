@@ -154,17 +154,14 @@ Each source is the set specs in a namespace.
 Optional argument SPEC-NAMES is a list of spec keyword strings.
 If not supplied, it is retrieved with
 `cider-sync-request:spec-list'."
-  (cl-flet ((source-compare (s1 s2)
-              (funcall (symbol-value 'helm-cider-spec-ns-compare-fn)
-                       (assoc-default 'name s1)
-                       (assoc-default 'name s2))))
-    (cl-loop
-       with ht = (helm-cider-spec--hashtable (or spec-names
-                                                 (cider-sync-request:spec-list "")))
-       for ns being the hash-keys in ht using (hash-value names)
-       collect (helm-cider-spec--source ns names helm-cider-spec-follow)
-       into sources
-       finally (return (sort sources #'source-compare)))))
+  (cl-loop
+     with ht = (helm-cider-spec--hashtable (or spec-names
+                                               (cider-sync-request:spec-list "")))
+     for ns being the hash-keys in ht using (hash-value names)
+     collect (helm-cider-spec--source ns names helm-cider-spec-follow)
+     into sources
+     finally (return (cl-sort sources helm-cider-spec-ns-compare-fn
+                              :key (lambda (source) (assoc-default 'name source))))))
 
 (defun helm-cider-spec--all-ns ()
   "Return a list of all spec namespace strings.
