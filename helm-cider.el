@@ -257,18 +257,14 @@ need to be treated differently by
 If FOLLOW is true, use function `helm-follow-mode' for source."
   (helm-build-sync-source ns
     :action helm-cider-apropos-actions
-    :candidate-transformer (lambda (candidates)
-                             (cl-flet ((a-z (a b)
-                                         (let ((n1 (helm-cider--symbol-name (cdr a)))
-                                               (n2 (helm-cider--symbol-name (cdr b))))
-                                           (string< n1 n2))))
-                               (sort (copy-sequence candidates) #'a-z)))
-    :candidates (let ((fn (if doc
-                              (lambda (dict)
-                                (helm-cider--apropos-doc-candidate dict full-doc))
-                            #'helm-cider--apropos-candidate)))
-                  (mapcar fn (or dicts
-                                 (cider-sync-request:apropos "" ns doc))))
+    :candidates (thread-first (if doc
+                                  (lambda (dict)
+                                    (helm-cider--apropos-doc-candidate dict full-doc))
+                                #'helm-cider--apropos-candidate)
+                  (mapcar (if dicts
+                              (copy-sequence dicts)
+                            (cider-sync-request:apropos "" ns doc)))
+                  (cl-sort #'string< :key (lambda (dict) (helm-cider--symbol-name (cdr dict)))))
     :follow (when follow 1)
     :keymap (if doc
                 helm-cider--apropos-doc-map
