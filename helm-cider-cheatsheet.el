@@ -109,6 +109,7 @@ Invoke BEFORE before the walk, and AFTER after it, on each NODE."
 (defvar helm-cider-cheatsheet--ns-mappings
   '(("clojure.core" . "")
     ("clojure.core.async" . "async")
+    ("clojure.data" . "data")
     ("clojure.edn" . "edn")
     ("clojure.java.io" . "io")
     ("clojure.set" . "set")
