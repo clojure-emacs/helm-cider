@@ -167,8 +167,10 @@ Invoke BEFORE before the walk, and AFTER after it, on each NODE."
   (helm :buffer "*Helm CIDER Cheatsheet*"
         :sources (if (and (not helm-cider-cheatsheet--jacked-in-source-p)
                           (cider-connected-p))
-                     (setq helm-cider-cheatsheet--jacked-in-source-p t
-                           helm-cider-cheatsheet--source (helm-cider-cheatsheet--make-source))
+                     (progn
+                       (message "Preparing cheatsheet (this is only needed once after `cider-jack-in')...")
+                       (setq helm-cider-cheatsheet--jacked-in-source-p t
+                             helm-cider-cheatsheet--source (helm-cider-cheatsheet--make-source)))
                    helm-cider-cheatsheet--source)))
 
 
