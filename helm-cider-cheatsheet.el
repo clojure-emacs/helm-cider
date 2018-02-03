@@ -119,6 +119,7 @@ Invoke BEFORE before the walk, and AFTER after it, on each NODE."
     ("clojure.pprint" . "pprint")
     ("clojure.repl" . "repl")
     ("clojure.set" . "set")
+    ("clojure.spec.alpha" . "s")
     ("clojure.string" . "str")
     ("clojure.test" . "test")
     ("clojure.walk" . "walk")
