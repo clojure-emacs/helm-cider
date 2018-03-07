@@ -129,8 +129,10 @@ Invoke BEFORE before the walk, and AFTER after it, on each NODE."
 (defun helm-cider-cheatsheet--shorten-ns (ns)
   (or (assoc-default ns helm-cider-cheatsheet--ns-mappings) ns))
 
-(defun helm-cider-cheatsheet--item-to-helm-source (item)
-  "Turn ITEM, which will be (\"HEADING\" candidates...), into a helm-source."
+(defun helm-cider-cheatsheet--item-to-helm-source (item &optional apropos-ht)
+  "Turn ITEM, which will be (\"HEADING\" candidates...), into a helm-source.
+
+APROPOS-HT is a hash-table of (NAME APROPOS-DICT) entries."
   (cl-destructuring-bind (heading &rest entries) item
     (helm-build-sync-source heading
       :action helm-cider--doc-actions
@@ -138,11 +140,10 @@ Invoke BEFORE before the walk, and AFTER after it, on each NODE."
                      for s in (mapcar #'symbol-name entries)
                      for ns = (helm-cider--symbol-ns s)
                      for name = (helm-cider--symbol-name s)
-                     for face = (when (cider-connected-p)
-                                  (when-let* ((dict (cider-var-info s)))
-                                    (thread-last dict
-                                      helm-cider--var-type-from-info
-                                      helm-cider--symbol-face)))
+                     for face = (when apropos-ht
+                                  (thread-first (gethash s apropos-ht)
+                                    (nrepl-dict-get "type")
+                                    helm-cider--symbol-face))
                      for propertized-s = (let ((short-ns (helm-cider-cheatsheet--shorten-ns ns))
                                                (propertized-name (if face (cider-propertize name face) name)))
                                            (if (string-empty-p short-ns)
@@ -156,11 +157,16 @@ Invoke BEFORE before the walk, and AFTER after it, on each NODE."
       :persistent-help "Look up documentation")))
 
 (defun helm-cider-cheatsheet--make-source (&optional hierarchy)
-  (thread-last (or hierarchy cider-cheatsheet-hierarchy)
-    helm-cider-cheatsheet--propagate-headings
-    helm-cider-cheatsheet--flatten
-    helm-cider-cheatsheet--group-by-head
-    (mapcar 'helm-cider-cheatsheet--item-to-helm-source)))
+  (let ((ht (when (cider-connected-p)
+              (let ((ht (make-hash-table :test 'equal)))
+                (dolist (dict (cider-sync-request:apropos ""))
+                  (puthash (nrepl-dict-get dict "name") dict ht))
+                ht))))
+    (thread-last (or hierarchy cider-cheatsheet-hierarchy)
+      helm-cider-cheatsheet--propagate-headings
+      helm-cider-cheatsheet--flatten
+      helm-cider-cheatsheet--group-by-head
+      (mapcar (lambda (x) (helm-cider-cheatsheet--item-to-helm-source x ht))))))
 
 (defvar helm-cider-cheatsheet--source
   (helm-cider-cheatsheet--make-source)
