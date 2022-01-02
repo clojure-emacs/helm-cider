@@ -6,7 +6,7 @@
 ;; Package-Requires: ((emacs "26") (cider "1.0") (helm-core "2.8"))
 ;; Keywords: cider, clojure, helm, languages
 ;; URL: https://github.com/clojure-emacs/helm-cider
-;; Version: 0.4.0
+;; Version: 0.5.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
