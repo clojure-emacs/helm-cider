@@ -1,9 +1,9 @@
 ;;; helm-cider.el --- Helm interface to CIDER        -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016-2018 Tianxiang Xiong
+;; Copyright (C) 2016-2022 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
-;; Package-Requires: ((emacs "24.4") (cider "0.16") (helm-core "2.8"))
+;; Package-Requires: ((emacs "26") (cider "1.0") (helm-core "2.8"))
 ;; Keywords: cider, clojure, helm, languages
 ;; URL: https://github.com/clojure-emacs/helm-cider
 ;; Version: 0.4.0
