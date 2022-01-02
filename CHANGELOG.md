@@ -2,6 +2,9 @@
 
 ## master (unreleased)
 
+### Changed
+- [#13](https://github.com/clojure-emacs/helm-cider/pull/13): remove cider-compat require (removed from cider)
+
 ### New features
 
 - [#10](https://github.com/clojure-emacs/helm-cider/pull/10): Port `clojure-cheatsheet`

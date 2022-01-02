@@ -24,7 +24,6 @@
 ;;; Code:
 
 (require 'cider-client)
-(require 'cider-compat)
 (require 'cl-lib)
 (require 'helm-cider-util)
 (require 'subr-x)
