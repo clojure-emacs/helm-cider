@@ -1,6 +1,6 @@
 ;;; helm-cider-spec.el --- Helm interface to CIDER spec browser        -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016-2018 Tianxiang Xiong
+;; Copyright (C) 2016-2022 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
 
