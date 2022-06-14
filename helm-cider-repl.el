@@ -26,6 +26,7 @@
 (require 'cider-repl)
 (require 'cl-lib)
 (require 'subr-x)
+(require 'helm)
 
 
 ;;;; Customize
