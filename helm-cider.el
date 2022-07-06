@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016-2022 Tianxiang Xiong
 
 ;; Author: Tianxiang Xiong <tianxiang.xiong@gmail.com>
-;; Package-Requires: ((emacs "26") (cider "1.0") (helm-core "2.8"))
+;; Package-Requires: ((emacs "26") (cider "1.0") (helm-core "3.7.0"))
 ;; Keywords: cider, clojure, helm, languages
 ;; URL: https://github.com/clojure-emacs/helm-cider
 ;; Version: 0.5.0
@@ -32,7 +32,7 @@
 
 (require 'cider)
 (require 'cl-lib)
-(require 'helm)
+(require 'helm-core)
 (require 'helm-cider-cheatsheet)
 (require 'helm-cider-repl)
 (require 'helm-cider-spec)

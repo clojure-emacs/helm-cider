@@ -102,14 +102,14 @@ TYPE values include \"function\", \"macro\", etc."
   "Persistent action calling `cider-doc-lookup' on CANDIDATE."
   (cider-ensure-connected)
   (cider-ensure-op-supported "info")
-  (if (and (helm-attr 'doc-lookup-p)
-           (string= candidate (helm-attr 'current-candidate)))
+  (if (and (helm-get-attr 'doc-lookup-p)
+           (string= candidate (helm-get-attr 'current-candidate)))
       (progn
         (kill-buffer cider-doc-buffer)
-        (helm-attrset 'doc-lookup-p nil))
+        (helm-set-attr 'doc-lookup-p nil))
     (cider-doc-lookup candidate)
-    (helm-attrset 'doc-lookup-p t))
-  (helm-attrset 'current-candidate candidate))
+    (helm-set-attr 'doc-lookup-p t))
+  (helm-set-attr 'current-candidate candidate))
 
 (defmacro wrap-helm-cider-action (f &optional ops)
   "Wrap Helm CIDER actions.
