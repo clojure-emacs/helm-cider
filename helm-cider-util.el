@@ -125,7 +125,7 @@ TYPE values include \"function\", \"macro\", etc."
   (helm-make-actions
    "CiderDoc" (wrap-helm-cider-action cider-doc-lookup)
    "Find definition" (wrap-helm-cider-action helm-cider--find-var)
-   "Find on Grimoire" (wrap-helm-cider-action cider-grimoire-lookup))
+   "Find on ClojureDocs" (wrap-helm-cider-action cider-clojuredocs-lookup))
   "Actions for looking up symbol's documentation.")
 
 
