@@ -113,14 +113,14 @@ SPEC-NAME is a spec keyword string."
 
 (defun helm-cider-spec--persistent-action (candidate)
   "Persistent action for Helm CIDER apropos."
-  (if (and (helm-attr 'spec-lookup-p)
-           (string= candidate (helm-attr 'current-candidate)))
+  (if (and (helm-get-attr 'spec-lookup-p)
+           (string= candidate (helm-get-attr 'current-candidate)))
       (progn
         (kill-buffer cider-browse-spec-buffer)
-        (helm-attrset 'spec-lookup-p nil))
+        (helm-set-attr 'spec-lookup-p nil))
     (cider-browse-spec--browse candidate)
-    (helm-attrset 'spec-lookup-p t))
-  (helm-attrset 'current-candidate candidate))
+    (helm-set-attr 'spec-lookup-p t))
+  (helm-set-attr 'current-candidate candidate))
 
 (defun helm-cider-spec--source (ns spec-names &optional follow)
   "Helm source for specs in namespace NS.

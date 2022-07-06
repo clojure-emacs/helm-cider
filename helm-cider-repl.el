@@ -26,7 +26,7 @@
 (require 'cider-repl)
 (require 'cl-lib)
 (require 'subr-x)
-(require 'helm)
+(require 'helm-core)
 
 
 ;;;; Customize
@@ -119,14 +119,14 @@ Useful when the candidate longer than `helm-cider-repl-history-max-lines' lines.
                 (let ((inhibit-read-only t))
                   (erase-buffer)
                   (insert candidate))))
-      (if (and (helm-attr 'previewp)
-               (string= candidate (helm-attr 'current-candidate)))
+      (if (and (helm-get-attr 'previewp)
+               (string= candidate (helm-get-attr 'current-candidate)))
           (progn
             (kill-buffer buf)
-            (helm-attrset 'previewp nil))
+            (helm-set-attr 'previewp nil))
         (preview candidate)
-        (helm-attrset 'previewp t)))
-    (helm-attrset 'current-candidate candidate)))
+        (helm-set-attr 'previewp t)))
+    (helm-set-attr 'current-candidate candidate)))
 
 (defun helm-cider-repl--history-source ()
   "Source for Helm CIDER REPL history."
